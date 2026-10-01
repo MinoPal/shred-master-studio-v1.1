@@ -113,6 +113,18 @@ const GuitarProPlayer = forwardRef<GuitarProPlayerHandle, Props>(function Guitar
     let disposed = false;
     let api: any;
 
+    // Sblocco rapido dell'AudioContext al primo click utente
+    const unlockAudio = () => {
+      if (api && api.player) {
+        try {
+          api.play();
+          api.pause();
+        } catch {
+          /* noop */
+        }
+      }
+    };
+
     loadAlphaTab()
       .then((alphaTab) => {
         if (disposed || !hostRef.current || !scrollRef.current) return;
@@ -138,6 +150,9 @@ const GuitarProPlayer = forwardRef<GuitarProPlayerHandle, Props>(function Guitar
         });
         apiRef.current = api;
         api.playbackSpeed = speedRef.current;
+
+        // Inizializza l'ascolto per sbloccare l'audio al primo click ovunque nella pagina
+        window.addEventListener("click", unlockAudio, { once: true });
 
         // Disattiva il sintetizzatore MIDI interno di AlphaTab
         api.masterVolume = 0;
@@ -184,7 +199,7 @@ const GuitarProPlayer = forwardRef<GuitarProPlayerHandle, Props>(function Guitar
           const realTimeSec = e.currentTime / 1000;
           if (realTimeSec <= 0) return;
 
-          // CORREZIONE FONDAMENTALE: Convertiamo il tempo reale in tempo musicale dello spartito
+          // Convertiamo il tempo reale in tempo musicale dello spartito
           const currentSpeed = speedRef.current > 0 ? speedRef.current : 1;
           const songTimeSec = realTimeSec * currentSpeed;
 
@@ -208,6 +223,7 @@ const GuitarProPlayer = forwardRef<GuitarProPlayerHandle, Props>(function Guitar
 
     return () => {
       disposed = true;
+      window.removeEventListener("click", unlockAudio);
       try {
         api?.destroy();
       } catch {
