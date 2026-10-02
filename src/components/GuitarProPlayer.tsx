@@ -84,30 +84,36 @@ const GuitarProPlayer = forwardRef<GuitarProPlayerHandle, Props>(function Guitar
 
   const stopAll = () => {
     if (apiRef.current) {
-      apiRef.current.stop();
+      apiRef.current.pause();
       apiRef.current.timePosition = 0;
     }
     currentStepRef.current = -1;
     if (scrollRef.current) scrollRef.current.scrollTop = 0;
   };
 
-  useImperativeHandle(ref, () => ({
-    play: async () => {
-      if (apiRef.current) apiRef.current.play();
-    },
-    pause: () => {
-      if (apiRef.current) apiRef.current.pause();
-    },
-    stop: () => stopAll(),
-    restart: async () => {
-      stopAll();
-      if (apiRef.current) {
-        apiRef.current.timePosition = 0;
-        apiRef.current.play();
+ useImperativeHandle(ref, () => ({
+  play: async () => {
+    if (apiRef.current) {
+      // Se l'audioContext su mobile è suspended, lo riattiviamo al volo
+      if (apiRef.current.player?.audioContext?.state === "suspended") {
+        await apiRef.current.player.audioContext.resume();
       }
-    },
-    setSpeed: (v: number) => changeSpeed(v),
-  }));
+      apiRef.current.play();
+    }
+  },
+  pause: () => {
+    if (apiRef.current) apiRef.current.pause();
+  },
+  stop: () => stopAll(),
+  restart: async () => {
+    stopAll();
+    if (apiRef.current) {
+      apiRef.current.timePosition = 0;
+      apiRef.current.play();
+    }
+  },
+  setSpeed: (v: number) => changeSpeed(v),
+}));
 
   useEffect(() => {
     let disposed = false;
