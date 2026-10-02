@@ -49,7 +49,9 @@ const GuitarProPlayer = forwardRef<GuitarProPlayerHandle, Props>(function Guitar
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const apiRef = useRef<any>(null);
   const currentStepRef = useRef<number>(-1);
-  const playTimeoutRef = useRef<any>(null);
+
+  // Ref per tracciare se il player è già stato "riscaldato"
+  const isWarmedUpRef = useRef<boolean>(false);
 
   // Ref per tracciare la velocità corrente in tempo reale
   const speedRef = useRef<number>(propSpeed);
@@ -84,9 +86,6 @@ const GuitarProPlayer = forwardRef<GuitarProPlayerHandle, Props>(function Guitar
   }, []);
 
   const stopAll = () => {
-    if (playTimeoutRef.current) {
-      clearTimeout(playTimeoutRef.current);
-    }
     if (apiRef.current) {
       apiRef.current.pause();
       apiRef.current.timePosition = 0;
@@ -99,11 +98,7 @@ const GuitarProPlayer = forwardRef<GuitarProPlayerHandle, Props>(function Guitar
     play: async () => {
       if (!apiRef.current) return;
 
-      if (playTimeoutRef.current) {
-        clearTimeout(playTimeoutRef.current);
-      }
-
-      // 1. Sveglia fisica dell'AudioContext se in sospensione
+      // Riprendiamo l'AudioContext se suspended
       if (apiRef.current.player?.audioContext?.state === "suspended") {
         try {
           await apiRef.current.player.audioContext.resume();
@@ -112,42 +107,40 @@ const GuitarProPlayer = forwardRef<GuitarProPlayerHandle, Props>(function Guitar
         }
       }
 
-      // 2. RESET REALE FISICO: stop e azzeramento posizione
-      try {
-        apiRef.current.pause();
-        apiRef.current.timePosition = 0;
-      } catch {
-        /* noop */
-      }
-      currentStepRef.current = -1;
-      if (scrollRef.current) scrollRef.current.scrollTop = 0;
-
-      // 3. PAUSA DI RESET (400ms) per stabilizzare la scheda audio e i thread del browser
-      playTimeoutRef.current = setTimeout(() => {
-        if (apiRef.current) {
-          try {
-            apiRef.current.play();
-          } catch {
-            /* noop */
-          }
+      // TRUCCO SIMULAZIONE SECONDO PLAY:
+      // Se è il primo play in assoluto per questo brano, facciamo un micro-pulsante trasparente
+      if (!isWarmedUpRef.current) {
+        isWarmedUpRef.current = true;
+        try {
+          apiRef.current.play();
+          apiRef.current.pause();
+          apiRef.current.timePosition = 0;
+        } catch {
+          /* noop */
         }
-      }, 400);
+
+        // Dopo 50ms (impercettibile), avviamo la riproduzione reale
+        setTimeout(() => {
+          if (apiRef.current) {
+            apiRef.current.timePosition = 0;
+            apiRef.current.play();
+          }
+        }, 50);
+      } else {
+        // Dal secondo play in poi, parte normalmente ed istantaneamente
+        apiRef.current.play();
+      }
     },
     pause: () => {
-      if (playTimeoutRef.current) {
-        clearTimeout(playTimeoutRef.current);
-      }
       if (apiRef.current) apiRef.current.pause();
     },
     stop: () => stopAll(),
     restart: async () => {
       stopAll();
-      playTimeoutRef.current = setTimeout(() => {
-        if (apiRef.current) {
-          apiRef.current.timePosition = 0;
-          apiRef.current.play();
-        }
-      }, 400);
+      if (apiRef.current) {
+        apiRef.current.timePosition = 0;
+        apiRef.current.play();
+      }
     },
     setSpeed: (v: number) => changeSpeed(v),
   }));
@@ -155,6 +148,9 @@ const GuitarProPlayer = forwardRef<GuitarProPlayerHandle, Props>(function Guitar
   useEffect(() => {
     let disposed = false;
     let api: any;
+    
+    // Reset dello stato di riscaldamento ogni volta che cambia il file/brano
+    isWarmedUpRef.current = false;
 
     loadAlphaTab()
       .then((alphaTab) => {
@@ -200,14 +196,11 @@ const GuitarProPlayer = forwardRef<GuitarProPlayerHandle, Props>(function Guitar
           setReady(true);
         });
 
-        // RIPETIZIONE: Reset reale anche a fine brano prima di ripartire
         api.playerFinished.on(() => {
           stopAll();
-          playTimeoutRef.current = setTimeout(() => {
-            if (apiRef.current) {
-              apiRef.current.play();
-            }
-          }, 400);
+          if (apiRef.current) {
+            apiRef.current.play();
+          }
         });
 
         // PARAMETRI SCORRIMENTO AUTOMATICO OGNI 3 RIGHI
@@ -254,9 +247,6 @@ const GuitarProPlayer = forwardRef<GuitarProPlayerHandle, Props>(function Guitar
 
     return () => {
       disposed = true;
-      if (playTimeoutRef.current) {
-        clearTimeout(playTimeoutRef.current);
-      }
       try {
         api?.destroy();
       } catch {
