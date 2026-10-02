@@ -50,7 +50,10 @@ const GuitarProPlayer = forwardRef<GuitarProPlayerHandle, Props>(function Guitar
   const apiRef = useRef<any>(null);
   const currentStepRef = useRef<number>(-1);
 
-  // Ref per tracciare la velocità corrente in tempo reale per il calcolo dello scorrimento
+  // Ref per tracciare se il player è già stato "riscaldato"
+  const isWarmedUpRef = useRef<boolean>(false);
+
+  // Ref per tracciare la velocità corrente in tempo reale
   const speedRef = useRef<number>(propSpeed);
 
   const [ready, setReady] = useState(false);
@@ -91,45 +94,63 @@ const GuitarProPlayer = forwardRef<GuitarProPlayerHandle, Props>(function Guitar
     if (scrollRef.current) scrollRef.current.scrollTop = 0;
   };
 
- useImperativeHandle(ref, () => ({
-  play: async () => {
-    if (apiRef.current) {
-      // Se l'audioContext su mobile è suspended, lo riattiviamo al volo
+  useImperativeHandle(ref, () => ({
+    play: async () => {
+      if (!apiRef.current) return;
+
+      // Riprendiamo l'AudioContext se suspended
       if (apiRef.current.player?.audioContext?.state === "suspended") {
-        await apiRef.current.player.audioContext.resume();
-      }
-      apiRef.current.play();
-    }
-  },
-  pause: () => {
-    if (apiRef.current) apiRef.current.pause();
-  },
-  stop: () => stopAll(),
-  restart: async () => {
-    stopAll();
-    if (apiRef.current) {
-      apiRef.current.timePosition = 0;
-      apiRef.current.play();
-    }
-  },
-  setSpeed: (v: number) => changeSpeed(v),
-}));
-
-  useEffect(() => {
-    let disposed = false;
-    let api: any;
-
-    // Sblocco rapido dell'AudioContext al primo click utente
-    const unlockAudio = () => {
-      if (api && api.player) {
         try {
-          api.play();
-          api.pause();
+          await apiRef.current.player.audioContext.resume();
         } catch {
           /* noop */
         }
       }
-    };
+
+      // TRUCCO SIMULAZIONE SECONDO PLAY:
+      // Se è il primo play in assoluto per questo brano, facciamo un micro-pulsante trasparente
+      if (!isWarmedUpRef.current) {
+        isWarmedUpRef.current = true;
+        try {
+          apiRef.current.play();
+          apiRef.current.pause();
+          apiRef.current.timePosition = 0;
+        } catch {
+          /* noop */
+        }
+
+        // Dopo 50ms (impercettibile), avviamo la riproduzione reale
+        setTimeout(() => {
+          if (apiRef.current) {
+            apiRef.current.timePosition = 0;
+            apiRef.current.play();
+          }
+        }, 50);
+      } else {
+        // Dal secondo play in poi, parte normalmente ed istantaneamente
+        apiRef.current.play();
+      }
+    },
+    pause: () => {
+      if (apiRef.current) apiRef.current.pause();
+    },
+    stop: () => stopAll(),
+    restart: async () => {
+      stopAll();
+      if (apiRef.current) {
+        apiRef.current.timePosition = 0;
+        apiRef.current.play();
+      }
+    },
+    setSpeed: (v: number) => changeSpeed(v),
+  }));
+
+  useEffect(() => {
+    let disposed = false;
+    let api: any;
+    
+    // Reset dello stato di riscaldamento ogni volta che cambia il file/brano
+    isWarmedUpRef.current = false;
 
     loadAlphaTab()
       .then((alphaTab) => {
@@ -156,9 +177,6 @@ const GuitarProPlayer = forwardRef<GuitarProPlayerHandle, Props>(function Guitar
         });
         apiRef.current = api;
         api.playbackSpeed = speedRef.current;
-
-        // Inizializza l'ascolto per sbloccare l'audio al primo click ovunque nella pagina
-        window.addEventListener("click", unlockAudio, { once: true });
 
         // Disattiva il sintetizzatore MIDI interno di AlphaTab
         api.masterVolume = 0;
@@ -229,7 +247,6 @@ const GuitarProPlayer = forwardRef<GuitarProPlayerHandle, Props>(function Guitar
 
     return () => {
       disposed = true;
-      window.removeEventListener("click", unlockAudio);
       try {
         api?.destroy();
       } catch {
