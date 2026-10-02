@@ -161,10 +161,16 @@ function TrainingPage() {
   }
 
   function start() {
-    if (!audioCtxRef.current) {
+    // Se l'AudioContext non esiste o è stato chiuso, ne creiamo uno nuovo
+    if (!audioCtxRef.current || audioCtxRef.current.state === "closed") {
       audioCtxRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
     }
-    audioCtxRef.current.resume();
+
+    // Se è in sospensione, lo riattiviamo
+    if (audioCtxRef.current.state === "suspended") {
+      audioCtxRef.current.resume();
+    }
+
     beatCountRef.current = 0;
     measureCountRef.current = 0;
     setBeat(0);
@@ -178,10 +184,25 @@ function TrainingPage() {
   function stop() {
     if (timerRef.current) window.clearTimeout(timerRef.current);
     timerRef.current = null;
+
+    // Mettiamo in pausa l'AudioContext per liberare risorse sul telefono
+    if (audioCtxRef.current && audioCtxRef.current.state === "running") {
+      audioCtxRef.current.suspend();
+    }
+
     setPlaying(false);
   }
 
-  useEffect(() => () => { if (timerRef.current) window.clearTimeout(timerRef.current); }, []);
+  // CLEANUP FONDAMENTALE: Quando l'utente cambia pagina, chiudiamo del tutto l'audio del metronomo
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) window.clearTimeout(timerRef.current);
+      if (audioCtxRef.current) {
+        audioCtxRef.current.close().catch(() => {});
+        audioCtxRef.current = null;
+      }
+    };
+  }, []);
 
   function reset() {
     stop();
