@@ -50,9 +50,6 @@ const GuitarProPlayer = forwardRef<GuitarProPlayerHandle, Props>(function Guitar
   const apiRef = useRef<any>(null);
   const currentStepRef = useRef<number>(-1);
 
-  // Ref per tracciare se il player è già stato "riscaldato"
-  const isWarmedUpRef = useRef<boolean>(false);
-
   // Ref per tracciare la velocità corrente in tempo reale
   const speedRef = useRef<number>(propSpeed);
 
@@ -96,38 +93,14 @@ const GuitarProPlayer = forwardRef<GuitarProPlayerHandle, Props>(function Guitar
 
   useImperativeHandle(ref, () => ({
     play: async () => {
-      if (!apiRef.current) return;
-
-      // Riprendiamo l'AudioContext se suspended
-      if (apiRef.current.player?.audioContext?.state === "suspended") {
-        try {
-          await apiRef.current.player.audioContext.resume();
-        } catch {
-          /* noop */
-        }
-      }
-
-      // TRUCCO SIMULAZIONE SECONDO PLAY:
-      // Se è il primo play in assoluto per questo brano, facciamo un micro-pulsante trasparente
-      if (!isWarmedUpRef.current) {
-        isWarmedUpRef.current = true;
-        try {
-          apiRef.current.play();
-          apiRef.current.pause();
-          apiRef.current.timePosition = 0;
-        } catch {
-          /* noop */
-        }
-
-        // Dopo 50ms (impercettibile), avviamo la riproduzione reale
-        setTimeout(() => {
-          if (apiRef.current) {
-            apiRef.current.timePosition = 0;
-            apiRef.current.play();
+      if (apiRef.current) {
+        if (apiRef.current.player?.audioContext?.state === "suspended") {
+          try {
+            await apiRef.current.player.audioContext.resume();
+          } catch {
+            /* noop */
           }
-        }, 50);
-      } else {
-        // Dal secondo play in poi, parte normalmente ed istantaneamente
+        }
         apiRef.current.play();
       }
     },
@@ -148,9 +121,17 @@ const GuitarProPlayer = forwardRef<GuitarProPlayerHandle, Props>(function Guitar
   useEffect(() => {
     let disposed = false;
     let api: any;
-    
-    // Reset dello stato di riscaldamento ogni volta che cambia il file/brano
-    isWarmedUpRef.current = false;
+
+    const unlockAudio = () => {
+      if (api && api.player) {
+        try {
+          api.play();
+          api.pause();
+        } catch {
+          /* noop */
+        }
+      }
+    };
 
     loadAlphaTab()
       .then((alphaTab) => {
@@ -178,6 +159,8 @@ const GuitarProPlayer = forwardRef<GuitarProPlayerHandle, Props>(function Guitar
         apiRef.current = api;
         api.playbackSpeed = speedRef.current;
 
+        window.addEventListener("click", unlockAudio, { once: true });
+
         // Disattiva il sintetizzatore MIDI interno di AlphaTab
         api.masterVolume = 0;
         api.isMute = true;
@@ -196,11 +179,9 @@ const GuitarProPlayer = forwardRef<GuitarProPlayerHandle, Props>(function Guitar
           setReady(true);
         });
 
+        // FINE BRANO: Stop completo senza auto-replay
         api.playerFinished.on(() => {
           stopAll();
-          if (apiRef.current) {
-            apiRef.current.play();
-          }
         });
 
         // PARAMETRI SCORRIMENTO AUTOMATICO OGNI 3 RIGHI
@@ -247,6 +228,7 @@ const GuitarProPlayer = forwardRef<GuitarProPlayerHandle, Props>(function Guitar
 
     return () => {
       disposed = true;
+      window.removeEventListener("click", unlockAudio);
       try {
         api?.destroy();
       } catch {
