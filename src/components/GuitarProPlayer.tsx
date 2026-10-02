@@ -30,7 +30,7 @@ export type GuitarProPlayerHandle = {
   play: () => Promise<void>;
   pause: () => void;
   stop: () => void;
-  restart: (offsetSeconds?: number) => Promise<void>;
+  restart: () => Promise<void>;
   setSpeed?: (speed: number) => void;
 };
 
@@ -39,10 +39,12 @@ type Props = {
   title?: string;
   embedded?: boolean;
   speed?: number;
+  onReadyChange?: (ready: boolean) => void;
+  onFinished?: () => void;
 };
 
 const GuitarProPlayer = forwardRef<GuitarProPlayerHandle, Props>(function GuitarProPlayer(
-  { file, title, embedded = false, speed: propSpeed = 1 },
+  { file, title, embedded = false, speed: propSpeed = 1, onReadyChange, onFinished },
   ref
 ) {
   const hostRef = useRef<HTMLDivElement | null>(null);
@@ -54,9 +56,7 @@ const GuitarProPlayer = forwardRef<GuitarProPlayerHandle, Props>(function Guitar
   const speedRef = useRef<number>(propSpeed);
 
   const [ready, setReady] = useState(false);
-  const [playing, setPlaying] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [progress, setProgress] = useState(0);
 
   const changeSpeed = (v: number) => {
     speedRef.current = v;
@@ -84,8 +84,12 @@ const GuitarProPlayer = forwardRef<GuitarProPlayerHandle, Props>(function Guitar
 
   const stopAll = () => {
     if (apiRef.current) {
-      apiRef.current.pause();
-      apiRef.current.timePosition = 0;
+      try {
+        apiRef.current.pause();
+        apiRef.current.timePosition = 0;
+      } catch {
+        /* noop */
+      }
     }
     currentStepRef.current = -1;
     if (scrollRef.current) scrollRef.current.scrollTop = 0;
@@ -93,26 +97,42 @@ const GuitarProPlayer = forwardRef<GuitarProPlayerHandle, Props>(function Guitar
 
   useImperativeHandle(ref, () => ({
     play: async () => {
-      if (apiRef.current) {
-        if (apiRef.current.player?.audioContext?.state === "suspended") {
-          try {
-            await apiRef.current.player.audioContext.resume();
-          } catch {
-            /* noop */
-          }
+      if (!apiRef.current) return;
+
+      // Risveglio immediato dell'AudioContext se in sospensione
+      if (apiRef.current.player?.audioContext?.state === "suspended") {
+        try {
+          await apiRef.current.player.audioContext.resume();
+        } catch {
+          /* noop */
         }
+      }
+
+      try {
         apiRef.current.play();
+      } catch {
+        /* noop */
       }
     },
     pause: () => {
-      if (apiRef.current) apiRef.current.pause();
+      if (apiRef.current) {
+        try {
+          apiRef.current.pause();
+        } catch {
+          /* noop */
+        }
+      }
     },
     stop: () => stopAll(),
     restart: async () => {
       stopAll();
       if (apiRef.current) {
-        apiRef.current.timePosition = 0;
-        apiRef.current.play();
+        try {
+          apiRef.current.timePosition = 0;
+          apiRef.current.play();
+        } catch {
+          /* noop */
+        }
       }
     },
     setSpeed: (v: number) => changeSpeed(v),
@@ -122,16 +142,8 @@ const GuitarProPlayer = forwardRef<GuitarProPlayerHandle, Props>(function Guitar
     let disposed = false;
     let api: any;
 
-    const unlockAudio = () => {
-      if (api && api.player) {
-        try {
-          api.play();
-          api.pause();
-        } catch {
-          /* noop */
-        }
-      }
-    };
+    setReady(false);
+    onReadyChange?.(false);
 
     loadAlphaTab()
       .then((alphaTab) => {
@@ -159,11 +171,19 @@ const GuitarProPlayer = forwardRef<GuitarProPlayerHandle, Props>(function Guitar
         apiRef.current = api;
         api.playbackSpeed = speedRef.current;
 
-        window.addEventListener("click", unlockAudio, { once: true });
-
-        // Disattiva il sintetizzatore MIDI interno di AlphaTab
+        // Disattiva il sintetizzatore MIDI interno
         api.masterVolume = 0;
         api.isMute = true;
+
+        let scoreIsReady = false;
+        let renderIsReady = false;
+
+        const checkFullyReady = () => {
+          if (scoreIsReady && renderIsReady && !disposed) {
+            setReady(true);
+            onReadyChange?.(true);
+          }
+        };
 
         api.scoreLoaded.on((score: any) => {
           if (apiRef.current) {
@@ -176,12 +196,25 @@ const GuitarProPlayer = forwardRef<GuitarProPlayerHandle, Props>(function Guitar
               track.playbackInfo.isMute = true;
             });
           }
-          setReady(true);
+          scoreIsReady = true;
+          checkFullyReady();
         });
 
-        // FINE BRANO: Stop completo senza auto-replay
+        api.renderFinished.on(() => {
+          renderIsReady = true;
+          checkFullyReady();
+        });
+
+        if (api.playerReady) {
+          api.playerReady.on(() => {
+            checkFullyReady();
+          });
+        }
+
+        // STOP PULITO A FINE BRANO (Niente Replay Automatico)
         api.playerFinished.on(() => {
           stopAll();
+          onFinished?.();
         });
 
         // PARAMETRI SCORRIMENTO AUTOMATICO OGNI 3 RIGHI
@@ -190,21 +223,16 @@ const GuitarProPlayer = forwardRef<GuitarProPlayerHandle, Props>(function Guitar
         const THREE_STAFFS_HEIGHT_PX = 520;
 
         api.playerStateChanged.on((e: any) => {
-          const isPlaying = e.state === 1;
-          setPlaying(isPlaying);
-          if (!isPlaying && api.timePosition === 0) {
+          if (e.state === 0 && api.timePosition === 0) {
             currentStepRef.current = -1;
             if (scrollRef.current) scrollRef.current.scrollTop = 0;
           }
         });
 
         api.playerPositionChanged.on((e: any) => {
-          setProgress(e.endTime > 0 ? (e.currentTime / e.endTime) * 100 : 0);
-
           const realTimeSec = e.currentTime / 1000;
           if (realTimeSec <= 0) return;
 
-          // Convertiamo il tempo reale in tempo musicale dello spartito
           const currentSpeed = speedRef.current > 0 ? speedRef.current : 1;
           const songTimeSec = realTimeSec * currentSpeed;
 
@@ -228,7 +256,6 @@ const GuitarProPlayer = forwardRef<GuitarProPlayerHandle, Props>(function Guitar
 
     return () => {
       disposed = true;
-      window.removeEventListener("click", unlockAudio);
       try {
         api?.destroy();
       } catch {
@@ -243,7 +270,15 @@ const GuitarProPlayer = forwardRef<GuitarProPlayerHandle, Props>(function Guitar
       {error ? (
         <p className="px-5 py-6 text-xs font-semibold uppercase tracking-widest text-destructive">{error}</p>
       ) : (
-        <div ref={scrollRef} className="h-[520px] overflow-y-auto overflow-x-hidden bg-white">
+        <div ref={scrollRef} className="h-[520px] overflow-y-auto overflow-x-hidden bg-white relative">
+          {!ready && (
+            <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/80 backdrop-blur-sm">
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-primary">
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                <span>Preparing Tab & Audio...</span>
+              </div>
+            </div>
+          )}
           <div ref={hostRef} />
         </div>
       )}

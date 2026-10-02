@@ -222,7 +222,7 @@ function useMp3Player() {
     setPlayingId(null);
   }
 
-  async function playStems(riff: Riff, syncScore?: () => Promise<void>): Promise<boolean> {
+  async function playStems(riff: Riff, syncScore?: () => Promise<void>, onEnd?: () => void): Promise<boolean> {
     if (!riff.stems || riff.stems.length === 0) return false;
     stop();
     setErrorId(null);
@@ -248,13 +248,11 @@ function useMp3Player() {
       });
 
       if (leaderAudio) {
+        // FINE BRANO STEMS: Stop pulito e reset senza auto-loop
         (leaderAudio as HTMLAudioElement).onended = () => {
           if (generation === playbackGenerationRef.current) {
-            elements.forEach((el) => {
-              el.currentTime = 0;
-              el.play().catch(() => {});
-            });
-            void syncScore?.();
+            stop();
+            onEnd?.();
           }
         };
       }
@@ -274,9 +272,9 @@ function useMp3Player() {
     }
   }
 
-  async function play(riff: Riff, syncScore?: () => Promise<void>) {
+  async function play(riff: Riff, syncScore?: () => Promise<void>, onEnd?: () => void) {
     if (riff.stems && riff.stems.length > 0) {
-      const ok = await playStems(riff, syncScore);
+      const ok = await playStems(riff, syncScore, onEnd);
       if (ok) return;
     }
 
@@ -321,11 +319,11 @@ function useMp3Player() {
 
         if (generation !== playbackGenerationRef.current) return;
 
+        // FINE BRANO TRACCIA SINGOLA: Stop pulito e reset senza auto-loop
         a.onended = () => {
           if (generation === playbackGenerationRef.current) {
-            a.currentTime = 0;
-            a.play().catch(() => {});
-            void syncScore?.();
+            stop();
+            onEnd?.();
           }
         };
 
@@ -408,7 +406,7 @@ function RiffsPage() {
     setCountIn(null);
   };
 
-  const startWithCountIn = async (riff: Riff, syncScore?: () => Promise<void>) => {
+  const startWithCountIn = async (riff: Riff, syncScore?: () => Promise<void>, onEnd?: () => void) => {
     stop();
     cancelCountIn();
     if (typeof window === "undefined") return;
@@ -449,7 +447,7 @@ function RiffsPage() {
       window.setTimeout(() => {
         if (gen !== countInGenRef.current) return;
         cancelCountIn();
-        void play(riff, syncScore);
+        void play(riff, syncScore, onEnd);
       }, 4 * beat * 1000 + 80)
     );
   };
@@ -492,7 +490,11 @@ function RiffsPage() {
         }
       : undefined;
 
-    void startWithCountIn(riff, syncScore);
+    const onEnd = () => {
+      guitarProRef.current?.stop();
+    };
+
+    void startWithCountIn(riff, syncScore, onEnd);
   };
 
   return (
@@ -645,161 +647,161 @@ function RiffsPage() {
                           >
                             S
                           </button>
-                        <span className="w-16 shrink-0 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+                          <span className="w-16 shrink-0 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
                             {translatedName}
-                        </span>
-                        <input
-                          type="range"
-                          min={0}
-                          max={1}
-                          step={0.01}
-                          value={vol}
-                          onChange={(e) =>
-                            updateStemMix(
-                              { ...stemVol, [stem.id]: Number(e.target.value) },
-                              stemMute,
-                              stemSolo
-                            )
-                        }
-                        className="h-1 flex-1 accent-primary cursor-pointer"
-                        aria-label={`${translatedName} volume`}
-                      />
-                      <span className="w-10 shrink-0 text-right text-[11px] font-bold tabular-nums text-primary">
-                          {Math.round(vol * 100)}%
-                        </span>
-                    </div>
+                          </span>
+                          <input
+                            type="range"
+                            min={0}
+                            max={1}
+                            step={0.01}
+                            value={vol}
+                            onChange={(e) =>
+                              updateStemMix(
+                                { ...stemVol, [stem.id]: Number(e.target.value) },
+                                stemMute,
+                                stemSolo
+                              )
+                            }
+                            className="h-1 flex-1 accent-primary cursor-pointer"
+                            aria-label={`${translatedName} volume`}
+                          />
+                          <span className="w-10 shrink-0 text-right text-[11px] font-bold tabular-nums text-primary">
+                            {Math.round(vol * 100)}%
+                          </span>
+                        </div>
                       );
                     })}
-                </div>
-              )}
+                  </div>
+                )}
 
-              {/* SPARTITO GUITAR TAB CLIENT-ONLY */}
-              <ClientOnly fallback={<div className="h-[520px] border-t border-border bg-background/70" />}>
-                <Suspense fallback={<div className="h-[520px] border-t border-border bg-background/70" />}>
-                  <GuitarProPlayer 
-                    ref={guitarProRef} 
-                    file="/track/Back_in_The_Rhythm.gp" 
-                    embedded 
-                    speed={speed} 
-                  />
-                </Suspense>
-              </ClientOnly>
+                {/* SPARTITO GUITAR TAB CLIENT-ONLY */}
+                <ClientOnly fallback={<div className="h-[520px] border-t border-border bg-background/70" />}>
+                  <Suspense fallback={<div className="h-[520px] border-t border-border bg-background/70" />}>
+                    <GuitarProPlayer 
+                      ref={guitarProRef} 
+                      file="/track/Back_in_The_Rhythm.gp" 
+                      embedded 
+                      speed={speed} 
+                    />
+                  </Suspense>
+                </ClientOnly>
 
-              {active && (
-                <div className="flex items-center gap-2 border-t border-primary/40 bg-primary/10 px-5 py-2 text-xs font-bold uppercase tracking-widest text-primary">
-                  <Flame className="h-3.5 w-3.5 animate-pulse" /> {t.live}
-                </div>
-              )}
-              {errorId === riff.id && (
-                <div className="flex items-center gap-2 border-t border-destructive/40 bg-destructive/10 px-5 py-2 text-[11px] font-semibold uppercase tracking-widest text-destructive">
-                  <AlertTriangle className="h-3.5 w-3.5" />
-                  {t.audioError}
-                </div>
-              )}
-            </article>
-          </div>
-        );
-      })}
-    </div>
-
-    {/* BANNER PROMOZIONALE PRO */}
-    <section className="relative overflow-hidden rounded-3xl border border-amber-500/50 bg-gradient-to-r from-amber-950/40 via-card to-background p-5 shadow-neon mt-2">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-amber-500 text-black shadow-lg">
-            <Crown className="h-6 w-6" />
-          </div>
-          <div className="min-w-0">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-amber-400">
-              {t.proBanner.badge}
-            </span>
-            <h2 className="truncate font-display text-xl text-foreground">{t.proBanner.title}</h2>
-            <p className="text-xs text-muted-foreground">{t.proBanner.desc}</p>
-          </div>
-        </div>
-
-        <div>
-          <button
-            onClick={() => setIsProModalOpen(true)}
-            className="flex items-center gap-2 rounded-2xl bg-amber-500 hover:bg-amber-400 text-black px-4 py-2.5 font-display text-sm uppercase font-bold shadow-lg active:scale-95 transition-all cursor-pointer"
-          >
-            <Sparkles className="h-4 w-4" />
-            <span>{t.proBanner.btn}</span>
-          </button>
-        </div>
-      </div>
-    </section>
-
-    {/* MODALE CON FORM HTML CLASSICO E INVIO INVISIBILE (IFRAME NASCOSTO) */}
-    {isProModalOpen && (
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
-        <div className="relative w-full max-w-md rounded-3xl border border-amber-500/60 bg-card p-6 shadow-2xl">
-          <button
-            onClick={closeModal}
-            className="absolute right-4 top-4 z-10 grid h-8 w-8 place-items-center rounded-full border border-border bg-background hover:bg-secondary text-muted-foreground transition-colors cursor-pointer"
-          >
-            <X className="h-4 w-4" />
-          </button>
-
-          <div className="flex items-center gap-3 mb-3">
-            <div className="grid h-10 w-10 place-items-center rounded-xl bg-amber-500 text-black">
-              <Crown className="h-5 w-5" />
+                {active && (
+                  <div className="flex items-center gap-2 border-t border-primary/40 bg-primary/10 px-5 py-2 text-xs font-bold uppercase tracking-widest text-primary">
+                    <Flame className="h-3.5 w-3.5 animate-pulse" /> {t.live}
+                  </div>
+                )}
+                {errorId === riff.id && (
+                  <div className="flex items-center gap-2 border-t border-destructive/40 bg-destructive/10 px-5 py-2 text-[11px] font-semibold uppercase tracking-widest text-destructive">
+                    <AlertTriangle className="h-3.5 w-3.5" />
+                    {t.audioError}
+                  </div>
+                )}
+              </article>
             </div>
-            <h3 className="font-display text-xl uppercase font-bold text-foreground">
-              {t.proModal.title}
-            </h3>
+          );
+        })}
+      </div>
+
+      {/* BANNER PROMOZIONALE PRO */}
+      <section className="relative overflow-hidden rounded-3xl border border-amber-500/50 bg-gradient-to-r from-amber-950/40 via-card to-background p-5 shadow-neon mt-2">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-amber-500 text-black shadow-lg">
+              <Crown className="h-6 w-6" />
+            </div>
+            <div className="min-w-0">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-amber-400">
+                {t.proBanner.badge}
+              </span>
+              <h2 className="truncate font-display text-xl text-foreground">{t.proBanner.title}</h2>
+              <p className="text-xs text-muted-foreground">{t.proBanner.desc}</p>
+            </div>
           </div>
 
-          <p className="text-xs text-muted-foreground mb-5 leading-relaxed">
-            {t.proModal.desc}
-          </p>
-
-          {/* Form nativo integrato con invio in background */}
-          <form 
-            action="https://docs.google.com/forms/u/0/d/e/1FAIpQLSfiLKWGKuX_A7BOwVpEoiffoHQXcJjvhSHRKBfWtiLlhy2dYw/formResponse" 
-            method="POST" 
-            target="hidden_iframe"
-            onSubmit={() => {
-              setIsSubmitted(true);
-            }}
-            className="flex flex-col gap-3"
-          >
-            <input
-              type="email"
-              name="entry.230576403" 
-              required
-              placeholder={t.proModal.placeholder}
-              className="w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm text-foreground focus:border-amber-500 focus:outline-none"
-            />
-            
+          <div>
             <button
-              type="submit"
-              className="flex items-center justify-center gap-2 rounded-2xl bg-amber-500 hover:bg-amber-400 text-black py-3 font-display text-sm uppercase font-bold shadow-lg active:scale-95 transition-all cursor-pointer"
+              onClick={() => setIsProModalOpen(true)}
+              className="flex items-center gap-2 rounded-2xl bg-amber-500 hover:bg-amber-400 text-black px-4 py-2.5 font-display text-sm uppercase font-bold shadow-lg active:scale-95 transition-all cursor-pointer"
             >
               <Sparkles className="h-4 w-4" />
-              <span>{t.proModal.submitBtn}</span>
+              <span>{t.proBanner.btn}</span>
             </button>
-          </form>
-
-          {/* Iframe nascosto per impedire il reindirizzamento della pagina */}
-          <iframe name="hidden_iframe" id="hidden_iframe" style={{ display: 'none' }}></iframe>
-
-          {/* Messaggio di successo personalizzato a comparsa */}
-          {isSubmitted && (
-            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-card/95 rounded-3xl p-6 text-center gap-3 animate-in fade-in">
-              <CheckCircle2 className="h-12 w-12 text-amber-500 animate-bounce" />
-              <p className="font-display text-lg text-foreground">Grandioso! Sei nella lista VIP.</p>
-              <button
-                onClick={closeModal}
-                className="mt-2 rounded-2xl bg-secondary px-6 py-2.5 font-display text-xs uppercase font-bold text-foreground hover:bg-secondary/80 transition-colors cursor-pointer"
-              >
-                {t.proModal.closeBtn}
-              </button>
-            </div>
-          )}
+          </div>
         </div>
-      </div>
-    )}
-  </div>
+      </section>
+
+      {/* MODALE CON FORM HTML CLASSICO E INVIO INVISIBILE (IFRAME NASCOSTO) */}
+      {isProModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="relative w-full max-w-md rounded-3xl border border-amber-500/60 bg-card p-6 shadow-2xl">
+            <button
+              onClick={closeModal}
+              className="absolute right-4 top-4 z-10 grid h-8 w-8 place-items-center rounded-full border border-border bg-background hover:bg-secondary text-muted-foreground transition-colors cursor-pointer"
+            >
+              <X className="h-4 w-4" />
+            </button>
+
+            <div className="flex items-center gap-3 mb-3">
+              <div className="grid h-10 w-10 place-items-center rounded-xl bg-amber-500 text-black">
+                <Crown className="h-5 w-5" />
+              </div>
+              <h3 className="font-display text-xl uppercase font-bold text-foreground">
+                {t.proModal.title}
+              </h3>
+            </div>
+
+            <p className="text-xs text-muted-foreground mb-5 leading-relaxed">
+              {t.proModal.desc}
+            </p>
+
+            {/* Form nativo integrato con invio in background */}
+            <form 
+              action="https://docs.google.com/forms/u/0/d/e/1FAIpQLSfiLKWGKuX_A7BOwVpEoiffoHQXcJjvhSHRKBfWtiLlhy2dYw/formResponse" 
+              method="POST" 
+              target="hidden_iframe"
+              onSubmit={() => {
+                setIsSubmitted(true);
+              }}
+              className="flex flex-col gap-3"
+            >
+              <input
+                type="email"
+                name="entry.230576403" 
+                required
+                placeholder={t.proModal.placeholder}
+                className="w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm text-foreground focus:border-amber-500 focus:outline-none"
+              />
+              
+              <button
+                type="submit"
+                className="flex items-center justify-center gap-2 rounded-2xl bg-amber-500 hover:bg-amber-400 text-black py-3 font-display text-sm uppercase font-bold shadow-lg active:scale-95 transition-all cursor-pointer"
+              >
+                <Sparkles className="h-4 w-4" />
+                <span>{t.proModal.submitBtn}</span>
+              </button>
+            </form>
+
+            {/* Iframe nascosto per impedire il reindirizzamento della pagina */}
+            <iframe name="hidden_iframe" id="hidden_iframe" style={{ display: 'none' }}></iframe>
+
+            {/* Messaggio di successo personalizzato a comparsa */}
+            {isSubmitted && (
+              <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-card/95 rounded-3xl p-6 text-center gap-3 animate-in fade-in">
+                <CheckCircle2 className="h-12 w-12 text-amber-500 animate-bounce" />
+                <p className="font-display text-lg text-foreground">Grandioso! Sei nella lista VIP.</p>
+                <button
+                  onClick={closeModal}
+                  className="mt-2 rounded-2xl bg-secondary px-6 py-2.5 font-display text-xs uppercase font-bold text-foreground hover:bg-secondary/80 transition-colors cursor-pointer"
+                >
+                  {t.proModal.closeBtn}
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
