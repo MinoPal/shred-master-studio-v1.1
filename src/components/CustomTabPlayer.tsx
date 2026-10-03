@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState, ChangeEvent } from "react";
-import { Play, Pause, Square, Upload, Loader2, ChevronDown } from "lucide-react";
+import { Play, Pause, Square, Upload, Loader2, ChevronDown, Minus, Plus } from "lucide-react";
 import * as alphaTab from "@coderline/alphatab";
 import { useLanguage } from "../context/LanguageContext";
-//import workerUrl from '@coderline/alphatab/dist/alphaTab.worker.mjs?url';
 
 const translations = {
   en: {
@@ -99,29 +98,29 @@ export default function CustomTabPlayer() {
   useEffect(() => {
     if (!hostRef.current || !scrollRef.current) return;
 
-try {
-  const api = new alphaTab.AlphaTabApi(hostRef.current, {
-    core: {
-      fontDirectory: "/alphatab/font/",
-      scriptFile: "/alphatab/alphaTab.core.mjs",
-      workerFile: "/alphatab/alphaTab.worker.mjs",
-    },
-    display: { 
-      scale: 0.85, 
-      layoutMode: alphaTab.LayoutMode.Page,
-      padding: [30, 10, 20, 10],
-    },
-    player: {
-    enablePlayer: true,
-    enableCursor: true,
-    enableAnimatedBeatCursor: true,
-    enableElementHighlighting: true,
-    enableUserInteraction: true,
-    scrollElement: scrollRef.current,
-    scrollMode: alphaTab.ScrollMode.Continuous, 
-    soundFont: "https://cdn.jsdelivr.net/npm/@coderline/alphatab@latest/dist/soundfont/sonivox.sf2",
-  },
-});
+    try {
+      const api = new alphaTab.AlphaTabApi(hostRef.current, {
+        core: {
+          fontDirectory: "/alphatab/font/",
+          scriptFile: "/alphatab/alphaTab.core.mjs",
+          workerFile: "/alphatab/alphaTab.worker.mjs",
+        },
+        display: { 
+          scale: 0.85, 
+          layoutMode: alphaTab.LayoutMode.Page,
+          padding: [30, 10, 20, 10],
+        },
+        player: {
+          enablePlayer: true,
+          enableCursor: true,
+          enableAnimatedBeatCursor: true,
+          enableElementHighlighting: true,
+          enableUserInteraction: true,
+          scrollElement: scrollRef.current,
+          scrollMode: alphaTab.ScrollMode.Continuous, 
+          soundFont: "https://cdn.jsdelivr.net/npm/@coderline/alphatab@latest/dist/soundfont/sonivox.sf2",
+        },
+      });
 
       apiRef.current = api;
 
@@ -213,8 +212,9 @@ try {
   };
 
   const handleSpeedChange = (v: number) => {
-    setSpeed(v);
-    if (apiRef.current) apiRef.current.playbackSpeed = v;
+    const clamped = Math.max(0.5, Math.min(1.5, Math.round(v * 100) / 100));
+    setSpeed(clamped);
+    if (apiRef.current) apiRef.current.playbackSpeed = clamped;
   };
 
   return (
@@ -298,18 +298,39 @@ try {
         )}
 
         {ready && fileName && (
-          <div className="flex items-center gap-3 text-xs font-bold uppercase text-foreground">
+          <div className="flex items-center gap-2 text-xs font-bold uppercase text-foreground">
             <span>{t.speed}</span>
+            <button
+              type="button"
+              onClick={() => handleSpeedChange(speed - 0.05)}
+              className="grid h-7 w-7 place-items-center rounded-lg border border-border bg-background hover:bg-secondary text-xs font-bold transition-colors active:scale-95 cursor-pointer"
+              title="-5%"
+            >
+              <Minus className="h-3.5 w-3.5" />
+            </button>
+
             <input
               type="range"
               min={0.5}
-              max={1.25}
-              step={0.05}
+              max={1.5}
+              step={0.01}
               value={speed}
               onChange={(e) => handleSpeedChange(Number(e.target.value))}
-              className="h-1 w-20 sm:w-28 accent-[hsl(var(--primary))]"
+              className="h-1.5 w-20 sm:w-28 accent-primary cursor-pointer"
             />
-            <span className="tabular-nums text-primary w-10">{Math.round(speed * 100)}%</span>
+
+            <button
+              type="button"
+              onClick={() => handleSpeedChange(speed + 0.05)}
+              className="grid h-7 w-7 place-items-center rounded-lg border border-border bg-background hover:bg-secondary text-xs font-bold transition-colors active:scale-95 cursor-pointer"
+              title="+5%"
+            >
+              <Plus className="h-3.5 w-3.5" />
+            </button>
+
+            <div className="flex items-center rounded-lg border border-border bg-background px-2 py-0.5 select-none">
+              <span className="tabular-nums text-primary font-bold">{Math.round(speed * 100)}%</span>
+            </div>
           </div>
         )}
       </div>

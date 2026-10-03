@@ -1,6 +1,6 @@
 import { createFileRoute, ClientOnly, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { Play, Pause, Flame, AlertTriangle, Upload, FileMusic, Minus, Plus, Crown, Sparkles, X, CheckCircle2 } from "lucide-react";
+import { Play, Pause, Flame, AlertTriangle, Upload, FileMusic, Minus, Plus, Crown, Sparkles, X, CheckCircle2, Repeat } from "lucide-react";
 import { lazy, Suspense } from "react";
 import { useLanguage } from "../context/LanguageContext";
 
@@ -248,7 +248,6 @@ function useMp3Player() {
       });
 
       if (leaderAudio) {
-        // FINE BRANO STEMS: Stop pulito e reset senza auto-loop
         (leaderAudio as HTMLAudioElement).onended = () => {
           if (generation === playbackGenerationRef.current) {
             stop();
@@ -319,7 +318,6 @@ function useMp3Player() {
 
         if (generation !== playbackGenerationRef.current) return;
 
-        // FINE BRANO TRACCIA SINGOLA: Stop pulito e reset senza auto-loop
         a.onended = () => {
           if (generation === playbackGenerationRef.current) {
             stop();
@@ -362,6 +360,13 @@ function RiffsPage() {
 
   const { play, stop, playingId, errorId, setStemMix, speed, changeSpeed } = useMp3Player();
   const [showStems, setShowStems] = useState(false);
+  const [isRepeat, setIsRepeat] = useState(false);
+  const isRepeatRef = useRef(isRepeat);
+
+  useEffect(() => {
+    isRepeatRef.current = isRepeat;
+  }, [isRepeat]);
+
   const [stemVol, setStemVol] = useState<Record<string, number>>({ guitar: 1, bass: 1, drums: 1 });
   const [stemMute, setStemMute] = useState<Record<string, boolean>>({});
   const [stemSolo, setStemSolo] = useState<Record<string, boolean>>({});
@@ -371,7 +376,6 @@ function RiffsPage() {
 
   const closeModal = () => {
     setIsProModalOpen(false);
-    // Reset dello stato di invio dopo la chiusura del modale
     setTimeout(() => setIsSubmitted(false), 300);
   };
 
@@ -492,6 +496,11 @@ function RiffsPage() {
 
     const onEnd = () => {
       guitarProRef.current?.stop();
+      if (isRepeatRef.current) {
+        setTimeout(() => {
+          void startWithCountIn(riff, syncScore, onEnd);
+        }, 150);
+      }
     };
 
     void startWithCountIn(riff, syncScore, onEnd);
@@ -543,6 +552,20 @@ function RiffsPage() {
                     <h2 className="truncate font-display text-2xl">{riff.title}</h2>
                   </div>
                   <div className="flex shrink-0 items-center gap-2">
+                    
+                    {/* TASTO RIPETIZIONE (A SINISTRA DELLA S - SOLO FRECCIETTA) */}
+                    <button
+                      onClick={() => setIsRepeat((v) => !v)}
+                      aria-label={isRepeat ? "Disattiva ripetizione" : "Attiva ripetizione"}
+                      title={isRepeat ? "Ripetizione attiva" : "Attiva ripetizione"}
+                      className={`grid h-12 w-12 place-items-center rounded-full bg-fire text-primary-foreground shadow-neon transition-all active:scale-95 ${
+                        isRepeat ? "ring-2 ring-primary-foreground/90 scale-105" : "opacity-75 hover:opacity-100"
+                      }`}
+                    >
+                      <Repeat className="h-5 w-5" />
+                    </button>
+
+                    {/* TASTO STEMS */}
                     {riff.stems && (
                       <button
                         onClick={() => setShowStems((v) => !v)}
@@ -552,6 +575,8 @@ function RiffsPage() {
                         <span className="font-display text-lg font-bold">S</span>
                       </button>
                     )}
+
+                    {/* TASTO PLAY / PAUSE */}
                     <button
                       onClick={() => toggleRiff(riff, active)}
                       className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-fire text-primary-foreground shadow-neon transition-transform active:scale-95"
@@ -756,7 +781,6 @@ function RiffsPage() {
               {t.proModal.desc}
             </p>
 
-            {/* Form nativo integrato con invio in background */}
             <form 
               action="https://docs.google.com/forms/u/0/d/e/1FAIpQLSfiLKWGKuX_A7BOwVpEoiffoHQXcJjvhSHRKBfWtiLlhy2dYw/formResponse" 
               method="POST" 
@@ -783,10 +807,8 @@ function RiffsPage() {
               </button>
             </form>
 
-            {/* Iframe nascosto per impedire il reindirizzamento della pagina */}
             <iframe name="hidden_iframe" id="hidden_iframe" style={{ display: 'none' }}></iframe>
 
-            {/* Messaggio di successo personalizzato a comparsa */}
             {isSubmitted && (
               <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-card/95 rounded-3xl p-6 text-center gap-3 animate-in fade-in">
                 <CheckCircle2 className="h-12 w-12 text-amber-500 animate-bounce" />
