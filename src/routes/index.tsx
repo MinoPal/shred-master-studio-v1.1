@@ -11,6 +11,10 @@ export const Route = createFileRoute("/")({
       { property: "og:title", content: "Allenamento — SHRED" },
       { property: "og:description", content: "Metronomo progressivo per chitarristi rock e metal." },
     ],
+    // Manifesto Json
+    links: [
+      { rel: "manifest", href: "/manifest.json" },
+    ],
   }),
   component: TrainingPage,
 });

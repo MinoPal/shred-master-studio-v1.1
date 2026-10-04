@@ -1,0 +1,40 @@
+{
+  "background_color": "#ffffff",
+  "description": "Free guitar practice tool with Guitar Pro tab support, stem mixer, progressive metronome, and tuner.",
+  "dir": "ltr",
+  "display": "standalone",
+  "name": "Shred Master Studio",
+  "orientation": "any",
+  "scope": "/",
+  "short_name": "ShredMaster",
+  "start_url": "/",
+  "theme_color": "#0a0505",
+  "icons": [
+    {
+      "src": "https://minopal-shred-master-studio.shred-master.workers.dev/favicon.ico",
+      "type": "image/x-icon",
+      "isSquare": false,
+      "isPng": false,
+      "isWebp": false,
+      "isJpg": false,
+      "width": 0,
+      "is512x512": false,
+      "is256x256": false,
+      "is192x192": false
+    },
+    {
+      "src": "https://minopal-shred-master-studio.shred-master.workers.dev/favicon.ico",
+      "type": "image/x-icon",
+      "isSquare": false,
+      "isPng": false,
+      "isWebp": false,
+      "isJpg": false,
+      "width": 0,
+      "is512x512": false,
+      "is256x256": false,
+      "is192x192": false
+    }
+  ],
+  "id": "/",
+  "lang": "en"
+}
