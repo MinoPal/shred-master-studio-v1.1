@@ -102,6 +102,20 @@ function TrainingPage() {
   const currentLang: Language = rawLang.includes("it") ? "it" : rawLang.includes("es") ? "es" : "en";
   const t = translations[currentLang] || translations.en;
 
+  // Registrazione del Service Worker per PWA
+  useEffect(() => {
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker
+        .register("/sw.js")
+        .then((registration) => {
+          console.log("Service Worker registrato con successo:", registration.scope);
+        })
+        .catch((error) => {
+          console.error("Errore durante la registrazione del Service Worker:", error);
+        });
+    }
+  }, []);
+
   const [bpm, setBpm] = useState(90);
   const [startBpm, setStartBpm] = useState(90);
   const [playing, setPlaying] = useState(false);
@@ -165,12 +179,10 @@ function TrainingPage() {
   }
 
   function start() {
-    // Se l'AudioContext non esiste o è stato chiuso, ne creiamo uno nuovo
     if (!audioCtxRef.current || audioCtxRef.current.state === "closed") {
       audioCtxRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
     }
 
-    // Se è in sospensione, lo riattiviamo
     if (audioCtxRef.current.state === "suspended") {
       audioCtxRef.current.resume();
     }
@@ -189,7 +201,6 @@ function TrainingPage() {
     if (timerRef.current) window.clearTimeout(timerRef.current);
     timerRef.current = null;
 
-    // Mettiamo in pausa l'AudioContext per liberare risorse sul telefono
     if (audioCtxRef.current && audioCtxRef.current.state === "running") {
       audioCtxRef.current.suspend();
     }
@@ -197,7 +208,6 @@ function TrainingPage() {
     setPlaying(false);
   }
 
-  // CLEANUP FONDAMENTALE: Quando l'utente cambia pagina, chiudiamo del tutto l'audio del metronomo
   useEffect(() => {
     return () => {
       if (timerRef.current) window.clearTimeout(timerRef.current);
