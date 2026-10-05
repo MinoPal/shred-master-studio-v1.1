@@ -36,5 +36,9 @@
     }
   ],
   "id": "/",
-  "lang": "en"
+  "lang": "en",
+  "categories": [
+    "music",
+    "utilities"
+  ]
 }
