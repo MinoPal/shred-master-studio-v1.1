@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "dev.workers.shred_master.minopal_shred_master_studio.twa",
+        "sha256_cert_fingerprints": ["27:CF:F5:05:34:7E:46:99:F7:64:E0:5E:D4:80:76:51:27:A2:0B:5C:CF:31:8D:26:76:93:75:1A:49:F1:62:55"]
+      }
+    }]

@@ -152,6 +152,7 @@ function useMp3Player() {
   const [playingId, setPlayingId] = useState<string | null>(null);
   const [errorId, setErrorId] = useState<string | null>(null);
   const [speed, setSpeedState] = useState<number>(1);
+  const speedRef = useRef<number>(1); // Ref per evitare stale closures e mantenere la velocità reale
   const playbackGenerationRef = useRef(0);
 
   const stemMixRef = useRef<{
@@ -191,6 +192,7 @@ function useMp3Player() {
 
   function changeSpeed(newSpeed: number) {
     const clamped = Math.max(0.5, Math.min(1.5, newSpeed));
+    speedRef.current = clamped; // Aggiorna immediatamente il ref per le riproduzioni asincrone
     setSpeedState(clamped);
 
     if (singleAudioRef.current) {
@@ -239,7 +241,6 @@ function useMp3Player() {
         a.preload = "auto";
         a.loop = false;
         if (s.url.startsWith("http")) a.crossOrigin = "anonymous";
-        configureAudioPitch(a, speed);
 
         if (!leaderAudio) leaderAudio = a;
 
@@ -260,8 +261,11 @@ function useMp3Player() {
 
       if (generation !== playbackGenerationRef.current) return false;
 
-      await Promise.all(elements.map((a) => a.play()));
       void syncScore?.();
+      await Promise.all(elements.map((a) => a.play()));
+
+      // Applica la velocità DOPO l'avvio della riproduzione per evitare che il browser la resetti a 1.0
+      elements.forEach((a) => configureAudioPitch(a, speedRef.current));
 
       setPlayingId(riff.id);
       return true;
@@ -291,7 +295,6 @@ function useMp3Player() {
         a.loop = false;
         if (url.startsWith("http")) a.crossOrigin = "anonymous";
         a.src = url;
-        configureAudioPitch(a, speed);
 
         singleAudioRef.current = a;
 
@@ -325,8 +328,12 @@ function useMp3Player() {
           }
         };
 
-        await a.play();
         void syncScore?.();
+        await a.play();
+
+        // Applica la velocità DOPO l'avvio della riproduzione per evitare che il browser la resetti a 1.0
+        configureAudioPitch(a, speedRef.current);
+
         started = true;
         break;
       } catch {
@@ -553,7 +560,7 @@ function RiffsPage() {
                   </div>
                   <div className="flex shrink-0 items-center gap-2">
                     
-                    {/* TASTO RIPETIZIONE (A SINISTRA DELLA S - SOLO FRECCIETTA) */}
+                    {/* TASTO RIPETIZIONE */}
                     <button
                       onClick={() => setIsRepeat((v) => !v)}
                       aria-label={isRepeat ? "Disattiva ripetizione" : "Attiva ripetizione"}
@@ -812,10 +819,15 @@ function RiffsPage() {
             {isSubmitted && (
               <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-card/95 rounded-3xl p-6 text-center gap-3 animate-in fade-in">
                 <CheckCircle2 className="h-12 w-12 text-amber-500 animate-bounce" />
-                <p className="font-display text-lg text-foreground">Grandioso! Sei nella lista VIP.</p>
+                <p className="font-display text-lg font-bold text-foreground">
+                  Sconto registrato!
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Ti abbiamo aggiunto alla lista d'attesa prioritaria.
+                </p>
                 <button
                   onClick={closeModal}
-                  className="mt-2 rounded-2xl bg-secondary px-6 py-2.5 font-display text-xs uppercase font-bold text-foreground hover:bg-secondary/80 transition-colors cursor-pointer"
+                  className="mt-2 rounded-xl bg-amber-500/20 px-4 py-2 text-xs font-bold uppercase text-amber-400 hover:bg-amber-500/30 transition-colors cursor-pointer"
                 >
                   {t.proModal.closeBtn}
                 </button>
