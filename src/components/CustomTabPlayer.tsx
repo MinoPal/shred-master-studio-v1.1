@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, ChangeEvent } from "react";
-import { Play, Pause, Square, Upload, Loader2, ChevronDown, Minus, Plus } from "lucide-react";
+import { Play, Pause, Square, Upload, Loader2, ChevronDown, Minus, Plus, Timer } from "lucide-react";
 import * as alphaTab from "@coderline/alphatab";
 import { useLanguage } from "../context/LanguageContext";
 
@@ -14,6 +14,8 @@ const translations = {
     stop: "Stop",
     instrument: "Instrument / Track:",
     speed: "Speed:",
+    countIn: "Count-In",
+    transpose: "Audio Pitch:",
     noFileTitle: "No file selected",
     noFileDesc: 'Click "Open File" in the top right to load your file (.gp, .gp3, .gp4, .gp5, .gpx) and start practicing.',
     errorRead: "Error reading local file.",
@@ -30,6 +32,8 @@ const translations = {
     stop: "Stop",
     instrument: "Strumento / Traccia:",
     speed: "Velocità:",
+    countIn: "Conteggio",
+    transpose: "Tonalità Audio:",
     noFileTitle: "Nessun file selezionato",
     noFileDesc: 'Clicca su "Apri File" in alto a destra per caricare il tuo file (.gp, .gp3, .gp4, .gp5, .gpx) e iniziare a esercitarti.',
     errorRead: "Errore nella lettura del file locale.",
@@ -46,6 +50,8 @@ const translations = {
     stop: "Detener",
     instrument: "Instrumento / Pista:",
     speed: "Velocidad:",
+    countIn: "Conteo",
+    transpose: "Tonalidad Audio:",
     noFileTitle: "Ningún archivo seleccionado",
     noFileDesc: 'Haz clic en "Abrir Archivo" arriba a la derecha para cargar tu archivo (.gp, .gp3, .gp4, .gp5, .gpx) y empezar a practicar.',
     errorRead: "Error al leer el archivo local.",
@@ -57,7 +63,6 @@ const translations = {
 export default function CustomTabPlayer() {
   const context = useLanguage() as any;
 
-  // Leggiamo la lingua salvata nel contesto o nel localStorage
   const activeLang = 
     context?.language || 
     context?.lang || 
@@ -86,10 +91,11 @@ export default function CustomTabPlayer() {
   const [tracks, setTracks] = useState<any[]>([]);
   const [selectedTrackIndex, setSelectedTrackIndex] = useState<number>(0);
   const [speed, setSpeed] = useState<number>(1);
+  const [countIn, setCountIn] = useState<boolean>(true);
+  const [transpose, setTranspose] = useState<number>(0);
   const [error, setError] = useState<string | null>(null);
   const [showUploadBtn, setShowUploadBtn] = useState(true);
 
-  // Mantiene il localStorage sincronizzato con la lingua corrente
   useEffect(() => {
     localStorage.setItem("app_lang", currentLang);
     localStorage.setItem("language", currentLang);
@@ -145,8 +151,12 @@ export default function CustomTabPlayer() {
           if (defaultIndex === -1) defaultIndex = 0;
 
           setSelectedTrackIndex(defaultIndex);
+          setTranspose(0);
+
           api.renderTracks([score.tracks[defaultIndex]]);
         }
+
+        api.countInVolume = countIn ? 1 : 0;
         setReady(true);
       });
 
@@ -180,6 +190,7 @@ export default function CustomTabPlayer() {
     setError(null);
     setReady(false);
     setFileName(file.name);
+    setTranspose(0);
     setShowUploadBtn(false); 
 
     const reader = new FileReader();
@@ -204,10 +215,39 @@ export default function CustomTabPlayer() {
     }
   };
 
+  const toggleCountIn = () => {
+    const nextState = !countIn;
+    setCountIn(nextState);
+    if (apiRef.current) {
+      apiRef.current.countInVolume = nextState ? 1 : 0;
+    }
+  };
+
+  // CAMBIO TONALITÀ: Solo audio, notazione e tasti TAB invariati
+  const handleTransposeChange = (newTranspose: number) => {
+    const clamped = Math.max(-12, Math.min(12, newTranspose));
+    setTranspose(clamped);
+
+    const api = apiRef.current;
+    if (!api || !api.score) return;
+
+    // 1. Selezioniamo le sole tracce melodiche (escludendo la batteria)
+    const melodicTracks = api.score.tracks.filter((tr: any) => !tr.isPercussion);
+
+    // 2. Modifichiamo il pitch ESCLUSIVAMENTE per il sintetizzatore audio WebAudio
+    // Non tocchiamo api.settings.notation né facciamo api.render(), così la TAB visiva resta identica.
+    api.changeTrackTranspositionPitch(melodicTracks, clamped);
+  };
+
   const handleTrackChange = (index: number) => {
     setSelectedTrackIndex(index);
     if (apiRef.current && apiRef.current.score?.tracks[index]) {
       apiRef.current.renderTracks([apiRef.current.score.tracks[index]]);
+      // Ri-applichiamo la trasposizione audio per la traccia selezionata se attiva
+      if (transpose !== 0) {
+        const melodicTracks = apiRef.current.score.tracks.filter((tr: any) => !tr.isPercussion);
+        apiRef.current.changeTrackTranspositionPitch(melodicTracks, transpose);
+      }
     }
   };
 
@@ -272,8 +312,24 @@ export default function CustomTabPlayer() {
             onClick={handleStop}
             disabled={!ready || !fileName}
             className="grid h-9 w-9 place-items-center rounded-xl border border-border bg-background hover:bg-secondary transition-colors disabled:opacity-40 cursor-pointer"
+            title={t.stop}
           >
             <Square className="h-4 w-4" />
+          </button>
+
+          <button
+            type="button"
+            onClick={toggleCountIn}
+            disabled={!ready || !fileName}
+            className={`flex items-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-bold uppercase transition-all cursor-pointer ${
+              countIn
+                ? "border-primary bg-primary/20 text-primary"
+                : "border-border bg-background hover:bg-secondary text-muted-foreground"
+            } disabled:opacity-40`}
+            title={t.countIn}
+          >
+            <Timer className="h-4 w-4" />
+            <span className="hidden sm:inline">{t.countIn}</span>
           </button>
         </div>
 
@@ -298,38 +354,71 @@ export default function CustomTabPlayer() {
         )}
 
         {ready && fileName && (
-          <div className="flex items-center gap-2 text-xs font-bold uppercase text-foreground">
-            <span>{t.speed}</span>
-            <button
-              type="button"
-              onClick={() => handleSpeedChange(speed - 0.05)}
-              className="grid h-7 w-7 place-items-center rounded-lg border border-border bg-background hover:bg-secondary text-xs font-bold transition-colors active:scale-95 cursor-pointer"
-              title="-5%"
-            >
-              <Minus className="h-3.5 w-3.5" />
-            </button>
+          <div className="flex flex-wrap items-center gap-4">
+            {/* TRASPOSIZIONE SOLTANTO AUDIO */}
+            <div className="flex items-center gap-2 text-xs font-bold uppercase text-foreground">
+              <span>{t.transpose}</span>
+              <button
+                type="button"
+                onClick={() => handleTransposeChange(transpose - 1)}
+                disabled={transpose <= -12}
+                className="grid h-7 w-7 place-items-center rounded-lg border border-border bg-background hover:bg-secondary text-xs font-bold transition-colors active:scale-95 disabled:opacity-40 cursor-pointer"
+                title="-1 semitono audio"
+              >
+                <Minus className="h-3.5 w-3.5" />
+              </button>
 
-            <input
-              type="range"
-              min={0.5}
-              max={1.5}
-              step={0.01}
-              value={speed}
-              onChange={(e) => handleSpeedChange(Number(e.target.value))}
-              className="h-1.5 w-20 sm:w-28 accent-primary cursor-pointer"
-            />
+              <div className="flex items-center rounded-lg border border-border bg-background px-2.5 py-0.5 select-none min-w-[55px] justify-center">
+                <span className="tabular-nums text-primary font-bold">
+                  {transpose > 0 ? `+${transpose}` : transpose} ST
+                </span>
+              </div>
 
-            <button
-              type="button"
-              onClick={() => handleSpeedChange(speed + 0.05)}
-              className="grid h-7 w-7 place-items-center rounded-lg border border-border bg-background hover:bg-secondary text-xs font-bold transition-colors active:scale-95 cursor-pointer"
-              title="+5%"
-            >
-              <Plus className="h-3.5 w-3.5" />
-            </button>
+              <button
+                type="button"
+                onClick={() => handleTransposeChange(transpose + 1)}
+                disabled={transpose >= 12}
+                className="grid h-7 w-7 place-items-center rounded-lg border border-border bg-background hover:bg-secondary text-xs font-bold transition-colors active:scale-95 disabled:opacity-40 cursor-pointer"
+                title="+1 semitono audio"
+              >
+                <Plus className="h-3.5 w-3.5" />
+              </button>
+            </div>
 
-            <div className="flex items-center rounded-lg border border-border bg-background px-2 py-0.5 select-none">
-              <span className="tabular-nums text-primary font-bold">{Math.round(speed * 100)}%</span>
+            {/* VELOCITÀ */}
+            <div className="flex items-center gap-2 text-xs font-bold uppercase text-foreground">
+              <span>{t.speed}</span>
+              <button
+                type="button"
+                onClick={() => handleSpeedChange(speed - 0.05)}
+                className="grid h-7 w-7 place-items-center rounded-lg border border-border bg-background hover:bg-secondary text-xs font-bold transition-colors active:scale-95 cursor-pointer"
+                title="-5%"
+              >
+                <Minus className="h-3.5 w-3.5" />
+              </button>
+
+              <input
+                type="range"
+                min={0.5}
+                max={1.5}
+                step={0.01}
+                value={speed}
+                onChange={(e) => handleSpeedChange(Number(e.target.value))}
+                className="h-1.5 w-20 sm:w-28 accent-primary cursor-pointer"
+              />
+
+              <button
+                type="button"
+                onClick={() => handleSpeedChange(speed + 0.05)}
+                className="grid h-7 w-7 place-items-center rounded-lg border border-border bg-background hover:bg-secondary text-xs font-bold transition-colors active:scale-95 cursor-pointer"
+                title="+5%"
+              >
+                <Plus className="h-3.5 w-3.5" />
+              </button>
+
+              <div className="flex items-center rounded-lg border border-border bg-background px-2 py-0.5 select-none">
+                <span className="tabular-nums text-primary font-bold">{Math.round(speed * 100)}%</span>
+              </div>
             </div>
           </div>
         )}
