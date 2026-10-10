@@ -1,6 +1,6 @@
 import { createFileRoute, ClientOnly, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { Play, Pause, Flame, AlertTriangle, Upload, FileMusic, Minus, Plus, Crown, Sparkles, X, CheckCircle2, Repeat } from "lucide-react";
+import { Play, Pause, Flame, AlertTriangle, Upload, FileMusic, Minus, Plus, Crown, Sparkles, X, Repeat } from "lucide-react";
 import { lazy, Suspense } from "react";
 import { useLanguage } from "../context/LanguageContext";
 
@@ -25,6 +25,7 @@ type Riff = {
   tempo: number;
   tag: string;
   src: string;
+  gpFile?: string;
   fallback?: string;
   altSources?: string[];
   stems?: { id: string; name: string; url: string }[];
@@ -32,12 +33,13 @@ type Riff = {
 };
 
 const RIFFS: Riff[] = [
-  {
-    id: "backintherhythm",
-    title: "Back in The Rhythm",
-    key: "E minor — E5 power chord",
+{
+    id: "acdc-style-workout",
+    title: "AC/DC Bends & Chords Style",
+    key: "E minor — E5 / D5 / G5",
     tempo: 128,
-    tag: "Palm mute · Gain 8",
+    tag: "Open Chords · Bends & Pull-offs",
+    gpFile: "/track/Back_in_The_Rhythm.gp",
     src: "/track/back-in-the-rhythm.wav",
     fallback: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
     tab: [],
@@ -48,14 +50,29 @@ const RIFFS: Riff[] = [
       { id: "drums", name: "Drums", url: "/track/back-in-the-rhythm-drums.wav" },
     ],
   },
+  {
+    id: "metallica-downpicking",
+    title: "Metallica Downpicking Style",
+    key: "E minor — Palm Mute E5",
+    tempo: 180,
+    tag: "Downpicking · Fast Speed",
+    gpFile: "/track/metallica-style-downpicking-workout.gp",
+    src: "/track/metallica-style-downpicking-workout-guitar.wav",
+    tab: [],
+    stems: [
+      { id: "guitar", name: "Guitar", url: "/track/metallica-style-downpicking-workout-guitar.wav" },
+      { id: "bass", name: "Bass", url: "/track/metallica-style-downpicking-workout-bass.wav" },
+      { id: "drums", name: "Drums", url: "/track/metallica-style-downpicking-workout-drums.wav" },
+    ],
+  },
 ];
 
 const translations = {
   en: {
-    badge: "/ PRACTICE VAULT",
-    titleMain: "Riffs",
-    titleHighlight: "TO LEARN",
-    subtitle: "Style-based practice riffs. Plug in, crank the gain, shred.",
+    badge: "/ SHRED ACADEMY",
+    titleMain: "Riff",
+    titleHighlight: "ACADEMY",
+    subtitle: "Master iconic guitar styles. Plug in, crank the gain, shred.",
     live: "Live — feel the gain",
     audioError: "Audio not found — check the MP3 file",
     uploadTitle: "Personal Practice / Custom Tab",
@@ -83,10 +100,10 @@ const translations = {
     },
   },
   it: {
-    badge: "/ ARCHIVIO RIFF",
+    badge: "/ SHRED ACADEMY",
     titleMain: "Riff",
-    titleHighlight: "DA IMPARARE",
-    subtitle: "Riff di allenamento in stile. Collega il jack, alza il gain e suona.",
+    titleHighlight: "ACADEMY",
+    subtitle: "Padroneggia gli stili iconici del rock. Collega la chitarra, alza il gain e suona.",
     live: "Live — senti il gain",
     audioError: "Audio non trovato — controlla il file MP3",
     uploadTitle: "Studio Personale / Tab Personalizzata",
@@ -114,10 +131,10 @@ const translations = {
     },
   },
   es: {
-    badge: "/ ARCHIVO DE RIFFS",
-    titleMain: "Riffs",
-    titleHighlight: "PARA APRENDER",
-    subtitle: "Riffs de práctica por estilo. Conecta la guitarra, sube el gain y toca.",
+    badge: "/ SHRED ACADEMY",
+    titleMain: "Riff",
+    titleHighlight: "ACADEMY",
+    subtitle: "Domina estilos icónicos del rock. Conecta la guitarra, sube el gain y toca.",
     live: "En vivo — siente el gain",
     audioError: "Audio no encontrado — comprueba el archivo MP3",
     uploadTitle: "Estudio Personal / Tab Personalizada",
@@ -145,14 +162,13 @@ const translations = {
     },
   },
 };
-
 function useMp3Player() {
   const stemAudiosRef = useRef<Map<string, HTMLAudioElement>>(new Map());
   const singleAudioRef = useRef<HTMLAudioElement | null>(null);
   const [playingId, setPlayingId] = useState<string | null>(null);
   const [errorId, setErrorId] = useState<string | null>(null);
   const [speed, setSpeedState] = useState<number>(1);
-  const speedRef = useRef<number>(1); // Ref per evitare stale closures e mantenere la velocità reale
+  const speedRef = useRef<number>(1);
   const playbackGenerationRef = useRef(0);
 
   const stemMixRef = useRef<{
@@ -192,7 +208,7 @@ function useMp3Player() {
 
   function changeSpeed(newSpeed: number) {
     const clamped = Math.max(0.5, Math.min(1.5, newSpeed));
-    speedRef.current = clamped; // Aggiorna immediatamente il ref per le riproduzioni asincrone
+    speedRef.current = clamped;
     setSpeedState(clamped);
 
     if (singleAudioRef.current) {
@@ -264,7 +280,6 @@ function useMp3Player() {
       void syncScore?.();
       await Promise.all(elements.map((a) => a.play()));
 
-      // Applica la velocità DOPO l'avvio della riproduzione per evitare che il browser la resetti a 1.0
       elements.forEach((a) => configureAudioPitch(a, speedRef.current));
 
       setPlayingId(riff.id);
@@ -331,7 +346,6 @@ function useMp3Player() {
         void syncScore?.();
         await a.play();
 
-        // Applica la velocità DOPO l'avvio della riproduzione per evitare che il browser la resetti a 1.0
         configureAudioPitch(a, speedRef.current);
 
         started = true;
@@ -397,7 +411,8 @@ function RiffsPage() {
     setStemMix(vol, mute, solo);
   };
 
-  const guitarProRef = useRef<any>(null);
+  // Mappa dei ref per gestire ciascun player AlphaTab separatamente per ogni card
+  const guitarProRefs = useRef<Record<string, any>>({});
 
   const [countIn, setCountIn] = useState<{ id: string; beat: number } | null>(null);
   const countInCtxRef = useRef<AudioContext | null>(null);
@@ -483,7 +498,7 @@ function RiffsPage() {
   const toggleRiff = (riff: Riff, active: boolean) => {
     if (active) {
       stop();
-      guitarProRef.current?.stop();
+      guitarProRefs.current[riff.id]?.stop();
       return;
     }
     if (countIn?.id === riff.id) {
@@ -491,18 +506,23 @@ function RiffsPage() {
       return;
     }
 
-    if (riff.id === "backintherhythm") {
-      guitarProRef.current?.stop();
-    }
-
-    const syncScore = riff.id === "backintherhythm"
-      ? async () => {
-          await guitarProRef.current?.restart();
+    const syncScore = async () => {
+      try {
+        const player = guitarProRefs.current[riff.id];
+        if (player) {
+          await player.restart();
         }
-      : undefined;
+      } catch (err) {
+        console.warn("AlphaTab sync error:", err);
+      }
+    };
 
     const onEnd = () => {
-      guitarProRef.current?.stop();
+      try {
+        guitarProRefs.current[riff.id]?.stop();
+      } catch {
+        /* noop */
+      }
       if (isRepeatRef.current) {
         setTimeout(() => {
           void startWithCountIn(riff, syncScore, onEnd);
@@ -555,8 +575,10 @@ function RiffsPage() {
             <div key={riff.id} className="flex flex-col gap-4">
               <article className={`overflow-hidden rounded-3xl border bg-card transition-shadow ${active ? "border-primary shadow-neon" : "border-border"}`}>
                 <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-5 py-3">
-                  <div className="min-w-0">
-                    <h2 className="truncate font-display text-2xl">{riff.title}</h2>
+                 <div className="min-w-0">
+                  <h2 className="font-display text-lg sm:text-xl font-bold leading-tight text-foreground whitespace-pre-line">
+                    {riff.title}
+                   </h2>
                   </div>
                   <div className="flex shrink-0 items-center gap-2">
                     
@@ -711,8 +733,11 @@ function RiffsPage() {
                 <ClientOnly fallback={<div className="h-[520px] border-t border-border bg-background/70" />}>
                   <Suspense fallback={<div className="h-[520px] border-t border-border bg-background/70" />}>
                     <GuitarProPlayer 
-                      ref={guitarProRef} 
-                      file="/track/Back_in_The_Rhythm.gp" 
+                      key={riff.id}
+                      ref={(el) => {
+                        if (el) guitarProRefs.current[riff.id] = el;
+                      }}
+                      file={riff.gpFile || "/track/Back_in_The_Rhythm.gp"} 
                       embedded 
                       speed={speed} 
                     />
@@ -813,26 +838,6 @@ function RiffsPage() {
                 <span>{t.proModal.submitBtn}</span>
               </button>
             </form>
-
-            <iframe name="hidden_iframe" id="hidden_iframe" style={{ display: 'none' }}></iframe>
-
-            {isSubmitted && (
-              <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-card/95 rounded-3xl p-6 text-center gap-3 animate-in fade-in">
-                <CheckCircle2 className="h-12 w-12 text-amber-500 animate-bounce" />
-                <p className="font-display text-lg font-bold text-foreground">
-                  Sconto registrato!
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Ti abbiamo aggiunto alla lista d'attesa prioritaria.
-                </p>
-                <button
-                  onClick={closeModal}
-                  className="mt-2 rounded-xl bg-amber-500/20 px-4 py-2 text-xs font-bold uppercase text-amber-400 hover:bg-amber-500/30 transition-colors cursor-pointer"
-                >
-                  {t.proModal.closeBtn}
-                </button>
-              </div>
-            )}
           </div>
         </div>
       )}
