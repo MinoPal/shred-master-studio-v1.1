@@ -12,7 +12,6 @@ import {
   RotateCcw,
   Music2,
   ChevronDown,
-  ChevronRight,
   Clock,
 } from "lucide-react";
 
@@ -74,6 +73,7 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     flat: "Flat",
     sharp: "Sharp",
     pluckString: "Pluck an open string",
+    tunerTip: "Tip: Bring your device microphone close to the amplifier or guitar for optimal detection.",
     postureTitle: "Hand Posture Guide",
     frettingHandBtn: "Fretting Hand (Left)",
     pickingHandBtn: "Picking Hand (Right)",
@@ -124,6 +124,7 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     flat: "Calante (Flat)",
     sharp: "Crescente (Sharp)",
     pluckString: "Suona una corda a vuoto",
+    tunerTip: "Suggerimento: avvicina il microfono del dispositivo all'amplificatore o alla chitarra per una ricezione ottimale.",
     postureTitle: "Guida alla Postura delle Mani",
     frettingHandBtn: "Mano sulla Tastiera (Sinistra)",
     pickingHandBtn: "Mano sul Plettro (Destra)",
@@ -174,6 +175,7 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     flat: "Bajo (Flat)",
     sharp: "Alto (Sharp)",
     pluckString: "Toca una cuerda al aire",
+    tunerTip: "Consejo: Acerca el micrófono de tu dispositivo al amplificador o a la guitarra para una mejor recepción.",
     postureTitle: "Guía de Postura de las Manos",
     frettingHandBtn: "Mano del Mástil (Izquierda)",
     pickingHandBtn: "Mano de la Púa (Derecha)",
@@ -305,9 +307,12 @@ function shiftFrequency(freq: number, totalSemitones: number): number {
   return freq * Math.pow(2, totalSemitones / 12);
 }
 
+const SMOOTHING_FACTOR = 0.15;
+
 function TunerPage() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const smoothedCentsRef = useRef<number>(0);
 
   const { lang, language } = useLanguage() as any;
   const rawLang = (lang || language || "en").toString().toLowerCase();
@@ -324,6 +329,7 @@ function TunerPage() {
   const [camErrorKey, setCamErrorKey] = useState<string | null>(null);
   const [micErrorKey, setMicErrorKey] = useState<string | null>(null);
   const [started, setStarted] = useState(false);
+  const [isAudioReady, setIsAudioReady] = useState(false);
 
   const [tunerActive, setTunerActive] = useState(false);
   const [showPrompt, setShowPrompt] = useState(false);
@@ -389,6 +395,7 @@ function TunerPage() {
       src.connect(analyser);
       analyserRef.current = analyser;
       bufRef.current = new Float32Array(analyser.fftSize);
+      setIsAudioReady(true);
     } catch {
       setMicErrorKey("micError");
     }
@@ -408,10 +415,11 @@ function TunerPage() {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       setPitch(null);
       setNote(null);
-    } else if (started && analyserRef.current) {
+      smoothedCentsRef.current = 0;
+    } else if (started && isAudioReady && analyserRef.current) {
       loop();
     }
-  }, [tunerActive, started, octaveShift, semitoneShift]);
+  }, [tunerActive, started, isAudioReady, octaveShift, semitoneShift]);
 
   function loop() {
     if (!tunerActive) return;
@@ -422,9 +430,21 @@ function TunerPage() {
     analyser.getFloatTimeDomainData(buf as Float32Array<ArrayBuffer>);
     const f = autoCorrelate(buf, ctx.sampleRate);
     if (f > 15 && f < 4000) {
-      const { string, cents } = nearestString(f, activeStrings);
+      const { string, cents: rawCents } = nearestString(f, activeStrings);
+      
+      // Gestione dinamica per le corde basse (es. Mi basso < 100 Hz)
+      const isLowString = f < 100;
+      const currentSmoothing = isLowString ? 0.35 : SMOOTHING_FACTOR;
+
+      const prev = smoothedCentsRef.current;
+      const smoothed = prev + (rawCents - prev) * currentSmoothing;
+      
+      const deadzoneLimit = isLowString ? 2.0 : 1.5;
+      const finalCents = Math.abs(smoothed) < deadzoneLimit ? 0 : smoothed;
+      smoothedCentsRef.current = finalCents;
+
       setPitch(f);
-      setNote({ name: string.name, octave: string.octave, cents });
+      setNote({ name: string.name, octave: string.octave, cents: finalCents });
     }
     rafRef.current = requestAnimationFrame(loop);
   }
@@ -713,6 +733,12 @@ function TunerPage() {
           </div>
         )}
 
+        {/* SUGGERIMENTO MICROFONO */}
+        <div className="mt-4 flex items-center gap-2.5 rounded-2xl border border-border bg-background/50 p-3 text-xs text-muted-foreground">
+          <Info className="h-4 w-4 shrink-0 text-primary" />
+          <span>{t("tunerTip")}</span>
+        </div>
+
         {/* VISUAL TUNER METER */}
         <div className="mt-6 flex flex-col items-center">
           <div className="text-center h-20 flex flex-col justify-center">
@@ -721,7 +747,7 @@ function TunerPage() {
                 <div className="font-display text-6xl font-black tracking-tight text-foreground">
                   {note.name}<span className="text-2xl font-bold text-muted-foreground">{note.octave.slice(-1)}</span>
                 </div>
-                <div className={`text-xs font-bold uppercase mt-1 ${inTune ? "text-emerald-500" : cents < 0 ? "text-amber-500" : "text-amber-500"}`}>
+                <div className={`text-xs font-bold uppercase mt-1 ${inTune ? "text-emerald-500" : "text-amber-500"}`}>
                   {inTune ? t("inTune") : cents < 0 ? `${t("flat")} (${cents.toFixed(1)}c)` : `${t("sharp")} (+${cents.toFixed(1)}c)`}
                 </div>
               </>
@@ -733,68 +759,97 @@ function TunerPage() {
           </div>
 
           <div className="relative mt-4 h-3 w-full max-w-md rounded-full bg-secondary overflow-hidden border border-border">
-            <div className="absolute inset-y-0 left-1/2 w-0.5 bg-muted-foreground/50 -translate-x-1/2" />
-            {tunerActive && note && (
-              <div
-                className={`absolute top-0 bottom-0 w-3 rounded-full transition-all duration-75 -translate-x-1/2 ${
-                  inTune ? "bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.8)]" : "bg-amber-500"
-                }`}
-                style={{ left: `${50 + (barPos / 48) * 45}%` }}
-              />
-            )}
+            <div
+              className={`absolute top-0 bottom-0 w-2 transition-all duration-75 rounded-full ${
+                inTune ? "bg-emerald-500 shadow-[0_0_10px_rgba(52,137,72,0.8)]" : "bg-primary shadow-neon"
+              }`}
+              style={{
+                left: `calc(50% + ${barPos}% - 4px)`,
+              }}
+            />
+          </div>
+          <div className="flex justify-between w-full max-w-md text-[10px] font-mono text-muted-foreground mt-1 px-1">
+            <span>-50c</span>
+            <span>-25c</span>
+            <span className="text-primary font-bold">0</span>
+            <span>+25c</span>
+            <span>+50c</span>
           </div>
         </div>
       </section>
 
-      {/* POSTURE TIPS SECTION */}
-      <section className="rounded-3xl border border-border bg-card p-6">
-        <h3 className="font-display text-xl">{t("postureTitle")}</h3>
-        <div className="mt-4 flex flex-col gap-3">
+      {/* POSTURE GUIDE SECTION */}
+      <section className="rounded-3xl border border-border bg-card p-6 shadow-2xl">
+        <div className="flex items-center justify-between pb-4 border-b border-border">
+          <h2 className="text-lg font-bold flex items-center gap-2">
+            <Info className="h-5 w-5 text-primary" /> {t("postureTitle")}
+          </h2>
+          <div className="flex gap-1.5 bg-background/60 p-1 rounded-xl border border-border">
+            <button
+              onClick={() => setHandView("LEFT")}
+              className={`px-3 py-1 text-xs font-bold rounded-lg transition-all ${
+                handView === "LEFT" ? "bg-primary text-primary-foreground shadow-neon" : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {t("frettingHandBtn")}
+            </button>
+            <button
+              onClick={() => setHandView("RIGHT")}
+              className={`px-3 py-1 text-xs font-bold rounded-lg transition-all ${
+                handView === "RIGHT" ? "bg-primary text-primary-foreground shadow-neon" : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {t("pickingHandBtn")}
+            </button>
+          </div>
+        </div>
+
+        <div className="mt-4 grid gap-4 md:grid-cols-3">
           {handView === "LEFT" ? (
             <>
-              <div className="flex items-start gap-3 rounded-2xl border border-border bg-background/50 p-4 text-xs leading-relaxed">
-                <ChevronRight className="h-4 w-4 shrink-0 text-primary mt-0.5" />
-                <p>
-                  <strong className="text-foreground font-bold mr-1">{t("leftTip1Title")}</strong>
-                  <span className="text-muted-foreground">{t("leftTip1Text")}</span>
+              <div className="rounded-2xl border border-border bg-background/40 p-4">
+                <p className="text-xs font-bold text-primary mb-1">01</p>
+                <p className="text-xs font-semibold text-foreground">
+                  <span className="text-primary">{t("leftTip1Title")}</span>
+                  {t("leftTip1Text")}
                 </p>
               </div>
-              <div className="flex items-start gap-3 rounded-2xl border border-border bg-background/50 p-4 text-xs leading-relaxed">
-                <ChevronRight className="h-4 w-4 shrink-0 text-primary mt-0.5" />
-                <p>
-                  <strong className="text-foreground font-bold mr-1">{t("leftTip2Title")}</strong>
-                  <span className="text-muted-foreground">{t("leftTip2Text")}</span>
+              <div className="rounded-2xl border border-border bg-background/40 p-4">
+                <p className="text-xs font-bold text-primary mb-1">02</p>
+                <p className="text-xs font-semibold text-foreground">
+                  <span className="text-primary">{t("leftTip2Title")}</span>
+                  {t("leftTip2Text")}
                 </p>
               </div>
-              <div className="flex items-start gap-3 rounded-2xl border border-border bg-background/50 p-4 text-xs leading-relaxed">
-                <ChevronRight className="h-4 w-4 shrink-0 text-primary mt-0.5" />
-                <p>
-                  <strong className="text-foreground font-bold mr-1">{t("leftTip3Title")}</strong>
-                  <span className="text-muted-foreground">{t("leftTip3Text")}</span>
+              <div className="rounded-2xl border border-border bg-background/40 p-4">
+                <p className="text-xs font-bold text-primary mb-1">03</p>
+                <p className="text-xs font-semibold text-foreground">
+                  <span className="text-primary">{t("leftTip3Title")}</span>
+                  {t("leftTip3Text")}
                 </p>
               </div>
             </>
           ) : (
             <>
-              <div className="flex items-start gap-3 rounded-2xl border border-border bg-background/50 p-4 text-xs leading-relaxed">
-                <ChevronRight className="h-4 w-4 shrink-0 text-primary mt-0.5" />
-                <p>
-                  <strong className="text-foreground font-bold mr-1">{t("rightTip1Title")}</strong>
-                  <span className="text-muted-foreground">{t("rightTip1Text")}</span>
+              <div className="rounded-2xl border border-border bg-background/40 p-4">
+                <p className="text-xs font-bold text-primary mb-1">01</p>
+                <p className="text-xs font-semibold text-foreground">
+                  <span className="text-primary">{t("rightTip1Title")}</span>
+                  {t("rightTip1Text")}
                 </p>
               </div>
-              <div className="flex items-start gap-3 rounded-2xl border border-border bg-background/50 p-4 text-xs leading-relaxed">
-                <ChevronRight className="h-4 w-4 shrink-0 text-primary mt-0.5" />
-                <p>
-                  <strong className="text-foreground font-bold mr-1">{t("rightTip2Title")}</strong>
-                  <span className="text-muted-foreground">{t("rightTip2Text")}</span>
+              <div className="rounded-2xl border border-border bg-background/40 p-4">
+                <p className="text-xs font-bold text-primary mb-1">02</p>
+                <p className="text-xs font-semibold text-foreground">
+                  <span className="text-primary">{t("rightTip2Title")}</span>
+                  {t("rightTip2Text")}
                 </p>
               </div>
-              <div className="flex items-start gap-3 rounded-2xl border border-border bg-background/50 p-4 text-xs leading-relaxed">
-                <ChevronRight className="h-4 w-4 shrink-0 text-primary mt-0.5" />
-                <p>
-                  <strong className="text-foreground font-bold mr-1">{t("rightTip3Title")}</strong>
-                  <span className="text-muted-foreground">{t("rightTip3Text")}</span>
+              <div className="rounded-2xl border border-border bg-background/40 p-4">
+                <p className="text-xs font-bold text-primary mb-1">03</p>
+                <p className="text-xs font-semibold text-foreground">
+                  <span className="text-primary">{t("rightTip3Title")}</span>
+                  {t("rightTip3Text")}
                 </p>
               </div>
             </>
