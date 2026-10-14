@@ -13,6 +13,7 @@ import {
   Music2,
   ChevronDown,
   Clock,
+  ChevronRight,
 } from "lucide-react";
 
 import { useLanguage } from "../context/LanguageContext";
@@ -77,17 +78,17 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     postureTitle: "Hand Posture Guide",
     frettingHandBtn: "Fretting Hand (Left)",
     pickingHandBtn: "Picking Hand (Right)",
-    leftTip1Title: "Arch your fingers: ",
+    leftTip1Title: "Arch your fingers",
     leftTip1Text: "Ensure your fingers hit the fretboard vertically to prevent unwanted string muting.",
-    leftTip2Title: "Thumb positioning: ",
+    leftTip2Title: "Thumb positioning",
     leftTip2Text: "Keep your thumb behind the neck, roughly opposite your middle finger, for optimal leverage.",
-    leftTip3Title: "Relax the wrist: ",
+    leftTip3Title: "Relax the wrist",
     leftTip3Text: "Keep your wrist straight and relaxed to avoid strain during fast passages.",
-    rightTip1Title: "Anchor point: ",
+    rightTip1Title: "Anchor point",
     rightTip1Text: "Rest your forearm lightly on the guitar body, keeping your wrist flexible.",
-    rightTip2Title: "Pick angle: ",
+    rightTip2Title: "Pick angle",
     rightTip2Text: "Angle the pick slightly (around 45°) against the strings to reduce resistance and increase speed.",
-    rightTip3Title: "Minimal movement: ",
+    rightTip3Title: "Minimal movement",
     rightTip3Text: "Use small, controlled movements from the wrist rather than the arm for efficient alternate picking.",
   },
   it: {
@@ -128,17 +129,17 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     postureTitle: "Guida alla Postura delle Mani",
     frettingHandBtn: "Mano sulla Tastiera (Sinistra)",
     pickingHandBtn: "Mano sul Plettro (Destra)",
-    leftTip1Title: "Incurva le dita: ",
+    leftTip1Title: "Incurva le dita",
     leftTip1Text: "Assicurati che le dita tocchino la tastiera verticalmente per evitare di stoppare involontariamente le altre corde.",
-    leftTip2Title: "Posizione del pollice: ",
+    leftTip2Title: "Posizione del pollice",
     leftTip2Text: "Tieni il pollice dietro il manico, all'incirca di fronte al dito medio, per una leva ottimale.",
-    leftTip3Title: "Rilassa il polso: ",
+    leftTip3Title: "Rilassa il polso",
     leftTip3Text: "Mantieni il polso dritto e rilassato per evitare affaticamenti durante i passaggi veloci.",
-    rightTip1Title: "Punto di ancoraggio: ",
+    rightTip1Title: "Punto di ancoraggio",
     rightTip1Text: "Appoggia leggermente l'avambraccio sul corpo della chitarra, mantenendo il polso flessibile.",
-    rightTip2Title: "Angolo del plettro: ",
+    rightTip2Title: "Angolo del plettro",
     rightTip2Text: "Inclina leggermente il plettro (circa 45°) rispetto alle corde per ridurre la resistenza e aumentare la velocità.",
-    rightTip3Title: "Movimento minimo: ",
+    rightTip3Title: "Movimento minimo",
     rightTip3Text: "Usa movimenti piccoli e controllati del polso invece dell'intero braccio per una pennata alternata efficiente.",
   },
   es: {
@@ -179,17 +180,17 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     postureTitle: "Guía de Postura de las Manos",
     frettingHandBtn: "Mano del Mástil (Izquierda)",
     pickingHandBtn: "Mano de la Púa (Derecha)",
-    leftTip1Title: "Arquea los dedos: ",
+    leftTip1Title: "Arquea los dedos",
     leftTip1Text: "Asegúrate de que tus dedos pisen el diapasón de forma vertical para evitar silenciar cuerdas adyacentes.",
-    leftTip2Title: "Posición del pulgar: ",
+    leftTip2Title: "Posición del pulgar",
     leftTip2Text: "Mantén el pulgar detrás del mástil, a la altura del dedo corazón, para una palanca óptima.",
-    leftTip3Title: "Relaja la muñeca: ",
+    leftTip3Title: "Relaja la muñeca",
     leftTip3Text: "Mantén la muñeca recta y relajada para evitar tensiones durante pasajes rápidos.",
-    rightTip1Title: "Punto de apoyo: ",
+    rightTip1Title: "Punto de apoyo",
     rightTip1Text: "Apoya suavemente el antebrazo sobre el cuerpo de la guitarra, manteniendo la muñeca flexible.",
-    rightTip2Title: "Ángulo de la púa: ",
+    rightTip2Title: "Ángulo de la púa",
     rightTip2Text: "Inclina ligeramente la púa (unos 45°) respecto a las cuerdas para reducir la resistencia y ganar velocidad.",
-    rightTip3Title: "Movimiento mínimo: ",
+    rightTip3Title: "Movimiento mínimo",
     rightTip3Text: "Realiza movimientos pequeños y controlados desde la muñeca en lugar de usar todo el brazo.",
   },
 };
@@ -432,16 +433,19 @@ function TunerPage() {
     if (f > 15 && f < 4000) {
       const { string, cents: rawCents } = nearestString(f, activeStrings);
       
-      // Gestione dinamica per le corde basse (es. Mi basso < 100 Hz)
-      const isLowString = f < 100;
-      const currentSmoothing = isLowString ? 0.35 : SMOOTHING_FACTOR;
+      // Sesta corda lasciata naturale, 1°-5° corda con smoothing
+      const isSixthString = string === activeStrings[0] || f < 95;
 
-      const prev = smoothedCentsRef.current;
-      const smoothed = prev + (rawCents - prev) * currentSmoothing;
-      
-      const deadzoneLimit = isLowString ? 2.0 : 1.5;
-      const finalCents = Math.abs(smoothed) < deadzoneLimit ? 0 : smoothed;
-      smoothedCentsRef.current = finalCents;
+      let finalCents: number;
+      if (isSixthString) {
+        finalCents = rawCents;
+        smoothedCentsRef.current = rawCents;
+      } else {
+        const prev = smoothedCentsRef.current;
+        const smoothed = prev + (rawCents - prev) * SMOOTHING_FACTOR;
+        finalCents = Math.abs(smoothed) < 1.5 ? 0 : smoothed;
+        smoothedCentsRef.current = finalCents;
+      }
 
       setPitch(f);
       setNote({ name: string.name, octave: string.octave, cents: finalCents });
@@ -778,78 +782,59 @@ function TunerPage() {
         </div>
       </section>
 
-      {/* POSTURE GUIDE SECTION */}
+      {/* POSTURE GUIDE SECTION - ORIZZONTALE A PIENA LARGHEZZA */}
       <section className="rounded-3xl border border-border bg-card p-6 shadow-2xl">
-        <div className="flex items-center justify-between pb-4 border-b border-border">
-          <h2 className="text-lg font-bold flex items-center gap-2">
-            <Info className="h-5 w-5 text-primary" /> {t("postureTitle")}
-          </h2>
-          <div className="flex gap-1.5 bg-background/60 p-1 rounded-xl border border-border">
-            <button
-              onClick={() => setHandView("LEFT")}
-              className={`px-3 py-1 text-xs font-bold rounded-lg transition-all ${
-                handView === "LEFT" ? "bg-primary text-primary-foreground shadow-neon" : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {t("frettingHandBtn")}
-            </button>
-            <button
-              onClick={() => setHandView("RIGHT")}
-              className={`px-3 py-1 text-xs font-bold rounded-lg transition-all ${
-                handView === "RIGHT" ? "bg-primary text-primary-foreground shadow-neon" : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {t("pickingHandBtn")}
-            </button>
-          </div>
-        </div>
+        <h2 className="text-lg font-bold flex items-center gap-2 mb-4">
+          <Info className="h-5 w-5 text-primary shrink-0" />
+          <span className="uppercase tracking-wider font-display">{t("postureTitle")}</span>
+        </h2>
 
-        <div className="mt-4 grid gap-4 md:grid-cols-3">
+        <div className="flex flex-col gap-3">
           {handView === "LEFT" ? (
             <>
-              <div className="rounded-2xl border border-border bg-background/40 p-4">
-                <p className="text-xs font-bold text-primary mb-1">01</p>
-                <p className="text-xs font-semibold text-foreground">
-                  <span className="text-primary">{t("leftTip1Title")}</span>
-                  {t("leftTip1Text")}
+              <div className="rounded-2xl border border-border bg-background/40 p-4 flex items-start gap-3">
+                <ChevronRight className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                <p className="text-xs text-foreground leading-relaxed">
+                  <span className="font-bold text-foreground">{t("leftTip1Title")}: </span>
+                  <span className="text-muted-foreground">{t("leftTip1Text")}</span>
                 </p>
               </div>
-              <div className="rounded-2xl border border-border bg-background/40 p-4">
-                <p className="text-xs font-bold text-primary mb-1">02</p>
-                <p className="text-xs font-semibold text-foreground">
-                  <span className="text-primary">{t("leftTip2Title")}</span>
-                  {t("leftTip2Text")}
+              <div className="rounded-2xl border border-border bg-background/40 p-4 flex items-start gap-3">
+                <ChevronRight className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                <p className="text-xs text-foreground leading-relaxed">
+                  <span className="font-bold text-foreground">{t("leftTip2Title")}: </span>
+                  <span className="text-muted-foreground">{t("leftTip2Text")}</span>
                 </p>
               </div>
-              <div className="rounded-2xl border border-border bg-background/40 p-4">
-                <p className="text-xs font-bold text-primary mb-1">03</p>
-                <p className="text-xs font-semibold text-foreground">
-                  <span className="text-primary">{t("leftTip3Title")}</span>
-                  {t("leftTip3Text")}
+              <div className="rounded-2xl border border-border bg-background/40 p-4 flex items-start gap-3">
+                <ChevronRight className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                <p className="text-xs text-foreground leading-relaxed">
+                  <span className="font-bold text-foreground">{t("leftTip3Title")}: </span>
+                  <span className="text-muted-foreground">{t("leftTip3Text")}</span>
                 </p>
               </div>
             </>
           ) : (
             <>
-              <div className="rounded-2xl border border-border bg-background/40 p-4">
-                <p className="text-xs font-bold text-primary mb-1">01</p>
-                <p className="text-xs font-semibold text-foreground">
-                  <span className="text-primary">{t("rightTip1Title")}</span>
-                  {t("rightTip1Text")}
+              <div className="rounded-2xl border border-border bg-background/40 p-4 flex items-start gap-3">
+                <ChevronRight className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                <p className="text-xs text-foreground leading-relaxed">
+                  <span className="font-bold text-foreground">{t("rightTip1Title")}: </span>
+                  <span className="text-muted-foreground">{t("rightTip1Text")}</span>
                 </p>
               </div>
-              <div className="rounded-2xl border border-border bg-background/40 p-4">
-                <p className="text-xs font-bold text-primary mb-1">02</p>
-                <p className="text-xs font-semibold text-foreground">
-                  <span className="text-primary">{t("rightTip2Title")}</span>
-                  {t("rightTip2Text")}
+              <div className="rounded-2xl border border-border bg-background/40 p-4 flex items-start gap-3">
+                <ChevronRight className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                <p className="text-xs text-foreground leading-relaxed">
+                  <span className="font-bold text-foreground">{t("rightTip2Title")}: </span>
+                  <span className="text-muted-foreground">{t("rightTip2Text")}</span>
                 </p>
               </div>
-              <div className="rounded-2xl border border-border bg-background/40 p-4">
-                <p className="text-xs font-bold text-primary mb-1">03</p>
-                <p className="text-xs font-semibold text-foreground">
-                  <span className="text-primary">{t("rightTip3Title")}</span>
-                  {t("rightTip3Text")}
+              <div className="rounded-2xl border border-border bg-background/40 p-4 flex items-start gap-3">
+                <ChevronRight className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                <p className="text-xs text-foreground leading-relaxed">
+                  <span className="font-bold text-foreground">{t("rightTip3Title")}: </span>
+                  <span className="text-muted-foreground">{t("rightTip3Text")}</span>
                 </p>
               </div>
             </>

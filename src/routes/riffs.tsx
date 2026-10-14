@@ -240,7 +240,7 @@ function useMp3Player() {
     setPlayingId(null);
   }
 
-  async function playStems(riff: Riff, syncScore?: () => Promise<void>, onEnd?: () => void): Promise<boolean> {
+async function playStems(riff: Riff, syncScore?: () => Promise<void>, onEnd?: () => void): Promise<boolean> {
     if (!riff.stems || riff.stems.length === 0) return false;
     stop();
     setErrorId(null);
@@ -252,16 +252,43 @@ function useMp3Player() {
       const elements: HTMLAudioElement[] = [];
       let leaderAudio: HTMLAudioElement | null = null;
 
-      riff.stems.forEach((s) => {
-        const a = new Audio(s.url);
-        a.preload = "auto";
-        a.loop = false;
-        if (s.url.startsWith("http")) a.crossOrigin = "anonymous";
+      // 1. Attendiamo che TUTTI gli stem siano pronti (bufferizzati) prima di avviare qualsiasi cosa
+      const loadPromises = riff.stems.map((s) => {
+        return new Promise<HTMLAudioElement>((resolve, reject) => {
+          const a = new Audio(s.url);
+          a.preload = "auto";
+          a.loop = false;
+          if (s.url.startsWith("http")) a.crossOrigin = "anonymous";
 
-        if (!leaderAudio) leaderAudio = a;
+          const onCanPlay = () => {
+            cleanup();
+            resolve(a);
+          };
+          const onError = () => {
+            cleanup();
+            reject(new Error(`Unable to load stem ${s.url}`));
+          };
+          const cleanup = () => {
+            a.removeEventListener("canplaythrough", onCanPlay);
+            a.removeEventListener("canplay", onCanPlay);
+            a.removeEventListener("error", onError);
+          };
 
+          a.addEventListener("canplaythrough", onCanPlay, { once: true });
+          a.addEventListener("canplay", onCanPlay, { once: true });
+          a.addEventListener("error", onError, { once: true });
+          a.load();
+        });
+      });
+
+      const loadedElements = await Promise.all(loadPromises);
+      if (generation !== playbackGenerationRef.current) return false;
+
+      loadedElements.forEach((a, idx) => {
+        const s = riff.stems![idx];
         stemAudiosRef.current.set(s.id, a);
         elements.push(a);
+        if (!leaderAudio) leaderAudio = a;
       });
 
       if (leaderAudio) {
@@ -277,6 +304,7 @@ function useMp3Player() {
 
       if (generation !== playbackGenerationRef.current) return false;
 
+      // 2. Ora che sono tutti pronti, sincronizziamo lo spartito e facciamo partire l'audio in perfetto orario
       void syncScore?.();
       await Promise.all(elements.map((a) => a.play()));
 
