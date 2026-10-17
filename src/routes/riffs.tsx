@@ -165,6 +165,7 @@ const translations = {
 function useMp3Player() {
   const stemAudiosRef = useRef<Map<string, HTMLAudioElement>>(new Map());
   const singleAudioRef = useRef<HTMLAudioElement | null>(null);
+  const preloadedAudiosRef = useRef<Map<string, HTMLAudioElement>>(new Map()); // <-- Aggiunto per la cache
   const [playingId, setPlayingId] = useState<string | null>(null);
   const [errorId, setErrorId] = useState<string | null>(null);
   const [speed, setSpeedState] = useState<number>(1);
@@ -238,6 +239,33 @@ function useMp3Player() {
     });
     stemAudiosRef.current.clear();
     setPlayingId(null);
+  }
+
+  // NUOVA FUNZIONE: Precarica silenziosamente tutti i brani e gli stem in background
+  function preloadRiffs(riffs: Riff[]) {
+    if (typeof window === "undefined") return;
+    riffs.forEach((riff) => {
+      if (riff.stems && riff.stems.length > 0) {
+        riff.stems.forEach((s) => {
+          if (!preloadedAudiosRef.current.has(s.url)) {
+            const a = new Audio(s.url);
+            a.preload = "auto";
+            if (s.url.startsWith("http")) a.crossOrigin = "anonymous";
+            a.load();
+            preloadedAudiosRef.current.set(s.url, a);
+          }
+        });
+      } else {
+        const sources = [riff.src, ...(riff.altSources ?? []), riff.fallback].filter(Boolean) as string[];
+        if (sources.length > 0 && !preloadedAudiosRef.current.has(sources[0])) {
+          const a = new Audio(sources[0]);
+          a.preload = "auto";
+          if (sources[0].startsWith("http")) a.crossOrigin = "anonymous";
+          a.load();
+          preloadedAudiosRef.current.set(sources[0], a);
+        }
+      }
+    });
   }
 
 async function playStems(riff: Riff, syncScore?: () => Promise<void>, onEnd?: () => void): Promise<boolean> {
@@ -397,7 +425,7 @@ async function playStems(riff: Riff, syncScore?: () => Promise<void>, onEnd?: ()
 
   useEffect(() => () => stop(), []);
 
-  return { play, stop, playingId, errorId, setStemMix, speed, changeSpeed };
+  return { play, stop, playingId, errorId, setStemMix, speed, changeSpeed, preloadRiffs };
 }
 
 function RiffsPage() {
@@ -407,7 +435,7 @@ function RiffsPage() {
 
   const t = translations[currentLang as keyof typeof translations] || translations.en;
 
-  const { play, stop, playingId, errorId, setStemMix, speed, changeSpeed } = useMp3Player();
+  const { play, stop, playingId, errorId, setStemMix, speed, changeSpeed, preloadRiffs } = useMp3Player();
   const [showStems, setShowStems] = useState(false);
  // Memorizza gli ID dei brani che hanno il loop attivo (es. { "acdc-style-workout": true })
   const [repeatState, setRepeatState] = useState<Record<string, boolean>>({});
@@ -416,6 +444,11 @@ function RiffsPage() {
   useEffect(() => {
     repeatStateRef.current = repeatState;
   }, [repeatState]);
+
+  // AVVIO AUTOMATICO: Appena si apre la pagina dei Riff, precarica l'audio in background
+  useEffect(() => {
+    preloadRiffs(RIFFS);
+  }, []);
 
   // Funzione per attivare/disattivare il loop su uno specifico brano
   const toggleRepeatForRiff = (riffId: string) => {
