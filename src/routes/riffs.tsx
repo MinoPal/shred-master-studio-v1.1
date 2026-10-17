@@ -409,12 +409,21 @@ function RiffsPage() {
 
   const { play, stop, playingId, errorId, setStemMix, speed, changeSpeed } = useMp3Player();
   const [showStems, setShowStems] = useState(false);
-  const [isRepeat, setIsRepeat] = useState(false);
-  const isRepeatRef = useRef(isRepeat);
+ // Memorizza gli ID dei brani che hanno il loop attivo (es. { "acdc-style-workout": true })
+  const [repeatState, setRepeatState] = useState<Record<string, boolean>>({});
+  const repeatStateRef = useRef<Record<string, boolean>>({});
 
   useEffect(() => {
-    isRepeatRef.current = isRepeat;
-  }, [isRepeat]);
+    repeatStateRef.current = repeatState;
+  }, [repeatState]);
+
+  // Funzione per attivare/disattivare il loop su uno specifico brano
+  const toggleRepeatForRiff = (riffId: string) => {
+    setRepeatState((prev) => ({
+      ...prev,
+      [riffId]: !prev[riffId],
+    }));
+  };
 
   const [stemVol, setStemVol] = useState<Record<string, number>>({ guitar: 1, bass: 1, drums: 1 });
   const [stemMute, setStemMute] = useState<Record<string, boolean>>({});
@@ -545,13 +554,14 @@ function RiffsPage() {
       }
     };
 
-    const onEnd = () => {
+ const onEnd = () => {
       try {
         guitarProRefs.current[riff.id]?.stop();
       } catch {
         /* noop */
       }
-      if (isRepeatRef.current) {
+      // Verifica se la ripetizione è attiva SPECIFICAMENTE per questo riff
+      if (repeatStateRef.current[riff.id]) {
         setTimeout(() => {
           void startWithCountIn(riff, syncScore, onEnd);
         }, 150);
@@ -610,17 +620,22 @@ function RiffsPage() {
                   </div>
                   <div className="flex shrink-0 items-center gap-2">
                     
-                    {/* TASTO RIPETIZIONE */}
-                    <button
-                      onClick={() => setIsRepeat((v) => !v)}
-                      aria-label={isRepeat ? "Disattiva ripetizione" : "Attiva ripetizione"}
-                      title={isRepeat ? "Ripetizione attiva" : "Attiva ripetizione"}
-                      className={`grid h-12 w-12 place-items-center rounded-full bg-fire text-primary-foreground shadow-neon transition-all active:scale-95 ${
-                        isRepeat ? "ring-2 ring-primary-foreground/90 scale-105" : "opacity-75 hover:opacity-100"
-                      }`}
-                    >
-                      <Repeat className="h-5 w-5" />
-                    </button>
+                   {/* TASTO RIPETIZIONE INDIPENDENTE */}
+                    {(() => {
+                      const isRiffRepeatActive = !!repeatState[riff.id];
+                      return (
+                        <button
+                          onClick={() => toggleRepeatForRiff(riff.id)}
+                          aria-label={isRiffRepeatActive ? "Disattiva ripetizione" : "Attiva ripetizione"}
+                          title={isRiffRepeatActive ? "Ripetizione attiva" : "Attiva ripetizione"}
+                          className={`grid h-12 w-12 place-items-center rounded-full bg-fire text-primary-foreground shadow-neon transition-all active:scale-95 ${
+                            isRiffRepeatActive ? "ring-2 ring-primary-foreground/90 scale-105" : "opacity-75 hover:opacity-100"
+                          }`}
+                        >
+                          <Repeat className="h-5 w-5" />
+                        </button>
+                      );
+                    })()}
 
                     {/* TASTO STEMS */}
                     {riff.stems && (
