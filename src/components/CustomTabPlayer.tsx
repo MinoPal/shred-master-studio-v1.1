@@ -113,8 +113,7 @@ export default function CustomTabPlayer() {
         },
         display: { 
           scale: 0.85, 
-          layoutMode: alphaTab.LayoutMode.Page,
-          padding: [30, 10, 20, 10],
+          padding: [20, 10, 20, 10],
         },
         player: {
           enablePlayer: true,
@@ -161,11 +160,20 @@ export default function CustomTabPlayer() {
       });
 
       api.playerStateChanged.on((e: any) => {
-        setPlaying(e.state === 1);
-        if (e.state === 0 && api.timePosition === 0) {
-          if (scrollRef.current) scrollRef.current.scrollTop = 0;
-        }
-      });
+  const isPlaying = e.state === 1;
+  setPlaying(isPlaying);
+
+  // NOTIFICA L'APP PER NASCONDERE/MOSTRARE IL MENU FLUTTUANTE
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(
+      new CustomEvent("shred:playback-change", { detail: { playing: isPlaying } })
+    );
+  }
+
+  if (e.state === 0 && api.timePosition === 0) {
+    if (scrollRef.current) scrollRef.current.scrollTop = 0;
+  }
+});
 
       api.error.on((err: any) => {
         console.warn("AlphaTab Warning:", err);
@@ -223,7 +231,6 @@ export default function CustomTabPlayer() {
     }
   };
 
-  // CAMBIO TONALITÀ: Solo audio, notazione e tasti TAB invariati
   const handleTransposeChange = (newTranspose: number) => {
     const clamped = Math.max(-12, Math.min(12, newTranspose));
     setTranspose(clamped);
@@ -231,11 +238,7 @@ export default function CustomTabPlayer() {
     const api = apiRef.current;
     if (!api || !api.score) return;
 
-    // 1. Selezioniamo le sole tracce melodiche (escludendo la batteria)
     const melodicTracks = api.score.tracks.filter((tr: any) => !tr.isPercussion);
-
-    // 2. Modifichiamo il pitch ESCLUSIVAMENTE per il sintetizzatore audio WebAudio
-    // Non tocchiamo api.settings.notation né facciamo api.render(), così la TAB visiva resta identica.
     api.changeTrackTranspositionPitch(melodicTracks, clamped);
   };
 
@@ -243,7 +246,6 @@ export default function CustomTabPlayer() {
     setSelectedTrackIndex(index);
     if (apiRef.current && apiRef.current.score?.tracks[index]) {
       apiRef.current.renderTracks([apiRef.current.score.tracks[index]]);
-      // Ri-applichiamo la trasposizione audio per la traccia selezionata se attiva
       if (transpose !== 0) {
         const melodicTracks = apiRef.current.score.tracks.filter((tr: any) => !tr.isPercussion);
         apiRef.current.changeTrackTranspositionPitch(melodicTracks, transpose);
@@ -444,12 +446,13 @@ export default function CustomTabPlayer() {
           </div>
         )}
 
+        {/* VIEWPORT DI SCROLL CORRETTO CON PADDING VERTICALE E FLEX-1 */}
         <div 
           ref={scrollRef} 
-          className="absolute inset-0 overflow-y-auto overflow-x-hidden px-2 pb-28 bg-white flex justify-center"
+          className="flex-1 overflow-y-auto overflow-x-hidden px-4 pt-8 pb-32 bg-white flex justify-center relative"
           style={{ scrollbarWidth: 'thin', scrollbarColor: '#cbd5e1 #f1f5f9' }}
         >
-          <div ref={hostRef} className="w-full max-w-[500px]" />
+          <div ref={hostRef} className="w-full max-w-4xl" />
         </div>
       </main>
     </div>

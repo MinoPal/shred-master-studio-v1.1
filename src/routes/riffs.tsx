@@ -33,7 +33,7 @@ type Riff = {
 };
 
 const RIFFS: Riff[] = [
-{
+  {
     id: "acdc-style-workout",
     title: "AC/DC Bends & Chords Style",
     key: "E minor — E5 / D5 / G5",
@@ -63,6 +63,21 @@ const RIFFS: Riff[] = [
       { id: "guitar", name: "Guitar", url: "/track/metallica-style-downpicking-workout-guitar.wav" },
       { id: "bass", name: "Bass", url: "/track/metallica-style-downpicking-workout-bass.wav" },
       { id: "drums", name: "Drums", url: "/track/metallica-style-downpicking-workout-drums.wav" },
+    ],
+  },
+  {
+    id: "guns-n-roses-alternate-picking-string-skipping",
+    title: "GUNS N' ROSES Alternate Picking & String Skipping Style",
+    key: "G minor — Alternate Picking G3",
+    tempo: 120,
+    tag: "Alternate Picking · String Skipping",
+    gpFile: "/track/guns-n-roses-alternate-picking-and-string-skipping-workout.gp",
+    src: "/track/guns-n-roses-alternate-picking-and-string-skipping-guitar.wav",
+    tab: [],
+    stems: [
+      { id: "guitar", name: "Guitar", url: "/track/guns-n-roses-alternate-picking-and-string-skipping-guitar.wav" },
+      { id: "bass", name: "Bass", url: "/track/guns-n-roses-alternate-picking-and-string-skipping-bass.wav" },
+      { id: "drums", name: "Drums", url: "/track/guns-n-roses-alternate-picking-and-string-skipping-drums.wav" },
     ],
   },
 ];
@@ -162,21 +177,23 @@ const translations = {
     },
   },
 };
+
 function useMp3Player() {
   const stemAudiosRef = useRef<Map<string, HTMLAudioElement>>(new Map());
   const singleAudioRef = useRef<HTMLAudioElement | null>(null);
-  const preloadedAudiosRef = useRef<Map<string, HTMLAudioElement>>(new Map()); // <-- Aggiunto per la cache
+  const preloadedAudiosRef = useRef<Map<string, HTMLAudioElement>>(new Map());
   const [playingId, setPlayingId] = useState<string | null>(null);
   const [errorId, setErrorId] = useState<string | null>(null);
   const [speed, setSpeedState] = useState<number>(1);
   const speedRef = useRef<number>(1);
   const playbackGenerationRef = useRef(0);
 
-  const stemMixRef = useRef<{
+  // Mixer separati per singolo riffId
+  const stemMixesRef = useRef<Record<string, {
     vol: Record<string, number>;
     mute: Record<string, boolean>;
     solo: Record<string, boolean>;
-  }>({ vol: { guitar: 1, bass: 1, drums: 1 }, mute: {}, solo: {} });
+  }>>({});
 
   function configureAudioPitch(a: HTMLAudioElement, rate: number) {
     a.playbackRate = rate;
@@ -185,8 +202,9 @@ function useMp3Player() {
     if ("mozPreservesPitch" in a) (a as any).mozPreservesPitch = true;
   }
 
-  function applyStemMix() {
-    const { vol, mute, solo } = stemMixRef.current;
+  function applyStemMix(riffId: string) {
+    const mix = stemMixesRef.current[riffId] || { vol: { guitar: 1, bass: 1, drums: 1 }, mute: {}, solo: {} };
+    const { vol, mute, solo } = mix;
     const anySolo = Object.values(solo).some(Boolean);
 
     stemAudiosRef.current.forEach((audioEl, id) => {
@@ -199,12 +217,13 @@ function useMp3Player() {
   }
 
   function setStemMix(
+    riffId: string,
     vol: Record<string, number>,
     mute: Record<string, boolean>,
     solo: Record<string, boolean>
   ) {
-    stemMixRef.current = { vol, mute, solo };
-    applyStemMix();
+    stemMixesRef.current[riffId] = { vol, mute, solo };
+    applyStemMix(riffId);
   }
 
   function changeSpeed(newSpeed: number) {
@@ -241,7 +260,6 @@ function useMp3Player() {
     setPlayingId(null);
   }
 
-  // NUOVA FUNZIONE: Precarica silenziosamente tutti i brani e gli stem in background
   function preloadRiffs(riffs: Riff[]) {
     if (typeof window === "undefined") return;
     riffs.forEach((riff) => {
@@ -268,7 +286,7 @@ function useMp3Player() {
     });
   }
 
-async function playStems(riff: Riff, syncScore?: () => Promise<void>, onEnd?: () => void): Promise<boolean> {
+  async function playStems(riff: Riff, syncScore?: () => Promise<void>, onEnd?: () => void): Promise<boolean> {
     if (!riff.stems || riff.stems.length === 0) return false;
     stop();
     setErrorId(null);
@@ -280,7 +298,6 @@ async function playStems(riff: Riff, syncScore?: () => Promise<void>, onEnd?: ()
       const elements: HTMLAudioElement[] = [];
       let leaderAudio: HTMLAudioElement | null = null;
 
-      // 1. Attendiamo che TUTTI gli stem siano pronti (bufferizzati) prima di avviare qualsiasi cosa
       const loadPromises = riff.stems.map((s) => {
         return new Promise<HTMLAudioElement>((resolve, reject) => {
           const a = new Audio(s.url);
@@ -328,11 +345,10 @@ async function playStems(riff: Riff, syncScore?: () => Promise<void>, onEnd?: ()
         };
       }
 
-      applyStemMix();
+      applyStemMix(riff.id);
 
       if (generation !== playbackGenerationRef.current) return false;
 
-      // 2. Ora che sono tutti pronti, sincronizziamo lo spartito e facciamo partire l'audio in perfetto orario
       void syncScore?.();
       await Promise.all(elements.map((a) => a.play()));
 
@@ -436,8 +452,7 @@ function RiffsPage() {
   const t = translations[currentLang as keyof typeof translations] || translations.en;
 
   const { play, stop, playingId, errorId, setStemMix, speed, changeSpeed, preloadRiffs } = useMp3Player();
-  const [showStems, setShowStems] = useState(false);
- // Memorizza gli ID dei brani che hanno il loop attivo (es. { "acdc-style-workout": true })
+  const [showStems, setShowStems] = useState<Record<string, boolean>>({});
   const [repeatState, setRepeatState] = useState<Record<string, boolean>>({});
   const repeatStateRef = useRef<Record<string, boolean>>({});
 
@@ -445,12 +460,10 @@ function RiffsPage() {
     repeatStateRef.current = repeatState;
   }, [repeatState]);
 
-  // AVVIO AUTOMATICO: Appena si apre la pagina dei Riff, precarica l'audio in background
   useEffect(() => {
     preloadRiffs(RIFFS);
   }, []);
 
-  // Funzione per attivare/disattivare il loop su uno specifico brano
   const toggleRepeatForRiff = (riffId: string) => {
     setRepeatState((prev) => ({
       ...prev,
@@ -458,30 +471,27 @@ function RiffsPage() {
     }));
   };
 
-  const [stemVol, setStemVol] = useState<Record<string, number>>({ guitar: 1, bass: 1, drums: 1 });
-  const [stemMute, setStemMute] = useState<Record<string, boolean>>({});
-  const [stemSolo, setStemSolo] = useState<Record<string, boolean>>({});
+  // STATI DEL MIXER INDICIZZATI PER Riff ID
+  const [riffStemVols, setRiffStemVols] = useState<Record<string, Record<string, number>>>({});
+  const [riffStemMutes, setRiffStemMutes] = useState<Record<string, Record<string, boolean>>>({});
+  const [riffStemSolos, setRiffStemSolos] = useState<Record<string, Record<string, boolean>>>({});
 
-  const [isProModalOpen, setIsProModalOpen] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
-
-  const closeModal = () => {
-    setIsProModalOpen(false);
-    setTimeout(() => setIsSubmitted(false), 300);
+  const toggleStemsForRiff = (riffId: string) => {
+    setShowStems((prev) => ({ ...prev, [riffId]: !prev[riffId] }));
   };
 
-  const updateStemMix = (
+  const updateStemMixForRiff = (
+    riffId: string,
     vol: Record<string, number>,
     mute: Record<string, boolean>,
     solo: Record<string, boolean>
   ) => {
-    setStemVol(vol);
-    setStemMute(mute);
-    setStemSolo(solo);
-    setStemMix(vol, mute, solo);
+    setRiffStemVols((prev) => ({ ...prev, [riffId]: vol }));
+    setRiffStemMutes((prev) => ({ ...prev, [riffId]: mute }));
+    setRiffStemSolos((prev) => ({ ...prev, [riffId]: solo }));
+    setStemMix(riffId, vol, mute, solo);
   };
 
-  // Mappa dei ref per gestire ciascun player AlphaTab separatamente per ogni card
   const guitarProRefs = useRef<Record<string, any>>({});
 
   const [countIn, setCountIn] = useState<{ id: string; beat: number } | null>(null);
@@ -587,13 +597,12 @@ function RiffsPage() {
       }
     };
 
- const onEnd = () => {
+    const onEnd = () => {
       try {
         guitarProRefs.current[riff.id]?.stop();
       } catch {
         /* noop */
       }
-      // Verifica se la ripetizione è attiva SPECIFICAMENTE per questo riff
       if (repeatStateRef.current[riff.id]) {
         setTimeout(() => {
           void startWithCountIn(riff, syncScore, onEnd);
@@ -642,6 +651,8 @@ function RiffsPage() {
         {RIFFS.map((riff) => {
           const active = playingId === riff.id;
           const counting = countIn?.id === riff.id;
+          const isStemsOpen = !!showStems[riff.id];
+
           return (
             <div key={riff.id} className="flex flex-col gap-4">
               <article className={`overflow-hidden rounded-3xl border bg-card transition-shadow ${active ? "border-primary shadow-neon" : "border-border"}`}>
@@ -673,9 +684,9 @@ function RiffsPage() {
                     {/* TASTO STEMS */}
                     {riff.stems && (
                       <button
-                        onClick={() => setShowStems((v) => !v)}
+                        onClick={() => toggleStemsForRiff(riff.id)}
                         aria-label="Stems mixer"
-                        className={`grid h-12 w-12 place-items-center rounded-full bg-fire text-primary-foreground shadow-neon transition-transform active:scale-95 ${showStems ? "ring-2 ring-primary-foreground/70" : ""}`}
+                        className={`grid h-12 w-12 place-items-center rounded-full bg-fire text-primary-foreground shadow-neon transition-transform active:scale-95 ${isStemsOpen ? "ring-2 ring-primary-foreground/70" : ""}`}
                       >
                         <span className="font-display text-lg font-bold">S</span>
                       </button>
@@ -698,8 +709,8 @@ function RiffsPage() {
                   </div>
                 </div>
 
-                {/* MIXER DEGLI STEM & SELETTORE VELOCITÀ */}
-                {riff.stems && showStems && (
+                {/* MIXER DEGLI STEM & SELETTORE VELOCITÀ PER QUESTO RIFF */}
+                {riff.stems && isStemsOpen && (
                   <div className="flex flex-col gap-3 border-t border-border px-5 py-4">
 
                     {/* CONTROLLO VELOCITÀ */}
@@ -742,18 +753,27 @@ function RiffsPage() {
                       </div>
                     </div>
 
-                    {/* LISTA STEM TRADOTTI */}
+                    {/* LISTA STEM TRADOTTI INDIPENDENTI */}
                     {riff.stems.map((stem) => {
-                      const muted = !!stemMute[stem.id];
-                      const soloed = !!stemSolo[stem.id];
-                      const vol = stemVol[stem.id] ?? 1;
+                      const currentVolMap = riffStemVols[riff.id] || { guitar: 1, bass: 1, drums: 1 };
+                      const currentMuteMap = riffStemMutes[riff.id] || {};
+                      const currentSoloMap = riffStemSolos[riff.id] || {};
+
+                      const muted = !!currentMuteMap[stem.id];
+                      const soloed = !!currentSoloMap[stem.id];
+                      const vol = currentVolMap[stem.id] ?? 1;
                       const translatedName = t.stems[stem.id as keyof typeof t.stems] || stem.name;
 
                       return (
                         <div key={stem.id} className="flex items-center gap-3">
                           <button
                             onClick={() =>
-                              updateStemMix(stemVol, { ...stemMute, [stem.id]: !muted }, stemSolo)
+                              updateStemMixForRiff(
+                                riff.id,
+                                currentVolMap,
+                                { ...currentMuteMap, [stem.id]: !muted },
+                                currentSoloMap
+                              )
                             }
                             aria-label={`Mute ${translatedName}`}
                             className={`grid h-8 w-8 shrink-0 place-items-center rounded-full border text-[11px] font-bold transition-colors cursor-pointer ${
@@ -766,7 +786,12 @@ function RiffsPage() {
                           </button>
                           <button
                             onClick={() =>
-                              updateStemMix(stemVol, stemMute, { ...stemSolo, [stem.id]: !soloed })
+                              updateStemMixForRiff(
+                                riff.id,
+                                currentVolMap,
+                                currentMuteMap,
+                                { ...currentSoloMap, [stem.id]: !soloed }
+                              )
                             }
                             aria-label={`Solo ${translatedName}`}
                             className={`grid h-8 w-8 shrink-0 place-items-center rounded-full text-[11px] font-bold transition-colors cursor-pointer ${
@@ -787,10 +812,11 @@ function RiffsPage() {
                             step={0.01}
                             value={vol}
                             onChange={(e) =>
-                              updateStemMix(
-                                { ...stemVol, [stem.id]: Number(e.target.value) },
-                                stemMute,
-                                stemSolo
+                              updateStemMixForRiff(
+                                riff.id,
+                                { ...currentVolMap, [stem.id]: Number(e.target.value) },
+                                currentMuteMap,
+                                currentSoloMap
                               )
                             }
                             className="h-1 flex-1 accent-primary cursor-pointer"
@@ -813,110 +839,15 @@ function RiffsPage() {
                       ref={(el) => {
                         if (el) guitarProRefs.current[riff.id] = el;
                       }}
-                      file={riff.gpFile || "/track/Back_in_The_Rhythm.gp"} 
-                      embedded 
-                      speed={speed} 
+                      file={riff.gpFile || ""}
                     />
                   </Suspense>
                 </ClientOnly>
-
-                {active && (
-                  <div className="flex items-center gap-2 border-t border-primary/40 bg-primary/10 px-5 py-2 text-xs font-bold uppercase tracking-widest text-primary">
-                    <Flame className="h-3.5 w-3.5 animate-pulse" /> {t.live}
-                  </div>
-                )}
-                {errorId === riff.id && (
-                  <div className="flex items-center gap-2 border-t border-destructive/40 bg-destructive/10 px-5 py-2 text-[11px] font-semibold uppercase tracking-widest text-destructive">
-                    <AlertTriangle className="h-3.5 w-3.5" />
-                    {t.audioError}
-                  </div>
-                )}
               </article>
             </div>
           );
         })}
       </div>
-
-      {/* BANNER PROMOZIONALE PRO */}
-      <section className="relative overflow-hidden rounded-3xl border border-amber-500/50 bg-gradient-to-r from-amber-950/40 via-card to-background p-5 shadow-neon mt-2">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-amber-500 text-black shadow-lg">
-              <Crown className="h-6 w-6" />
-            </div>
-            <div className="min-w-0">
-              <span className="text-[10px] font-bold uppercase tracking-widest text-amber-400">
-                {t.proBanner.badge}
-              </span>
-              <h2 className="truncate font-display text-xl text-foreground">{t.proBanner.title}</h2>
-              <p className="text-xs text-muted-foreground">{t.proBanner.desc}</p>
-            </div>
-          </div>
-
-          <div>
-            <button
-              onClick={() => setIsProModalOpen(true)}
-              className="flex items-center gap-2 rounded-2xl bg-amber-500 hover:bg-amber-400 text-black px-4 py-2.5 font-display text-sm uppercase font-bold shadow-lg active:scale-95 transition-all cursor-pointer"
-            >
-              <Sparkles className="h-4 w-4" />
-              <span>{t.proBanner.btn}</span>
-            </button>
-          </div>
-        </div>
-      </section>
-
-      {/* MODALE CON FORM HTML CLASSICO E INVIO INVISIBILE (IFRAME NASCOSTO) */}
-      {isProModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="relative w-full max-w-md rounded-3xl border border-amber-500/60 bg-card p-6 shadow-2xl">
-            <button
-              onClick={closeModal}
-              className="absolute right-4 top-4 z-10 grid h-8 w-8 place-items-center rounded-full border border-border bg-background hover:bg-secondary text-muted-foreground transition-colors cursor-pointer"
-            >
-              <X className="h-4 w-4" />
-            </button>
-
-            <div className="flex items-center gap-3 mb-3">
-              <div className="grid h-10 w-10 place-items-center rounded-xl bg-amber-500 text-black">
-                <Crown className="h-5 w-5" />
-              </div>
-              <h3 className="font-display text-xl uppercase font-bold text-foreground">
-                {t.proModal.title}
-              </h3>
-            </div>
-
-            <p className="text-xs text-muted-foreground mb-5 leading-relaxed">
-              {t.proModal.desc}
-            </p>
-
-            <form 
-              action="https://docs.google.com/forms/u/0/d/e/1FAIpQLSfiLKWGKuX_A7BOwVpEoiffoHQXcJjvhSHRKBfWtiLlhy2dYw/formResponse" 
-              method="POST" 
-              target="hidden_iframe"
-              onSubmit={() => {
-                setIsSubmitted(true);
-              }}
-              className="flex flex-col gap-3"
-            >
-              <input
-                type="email"
-                name="entry.230576403" 
-                required
-                placeholder={t.proModal.placeholder}
-                className="w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm text-foreground focus:border-amber-500 focus:outline-none"
-              />
-              
-              <button
-                type="submit"
-                className="flex items-center justify-center gap-2 rounded-2xl bg-amber-500 hover:bg-amber-400 text-black py-3 font-display text-sm uppercase font-bold shadow-lg active:scale-95 transition-all cursor-pointer"
-              >
-                <Sparkles className="h-4 w-4" />
-                <span>{t.proModal.submitBtn}</span>
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

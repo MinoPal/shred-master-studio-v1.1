@@ -50,7 +50,6 @@ const GuitarProPlayer = forwardRef<GuitarProPlayerHandle, Props>(function Guitar
   const hostRef = useRef<HTMLDivElement | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const apiRef = useRef<any>(null);
-  const currentStepRef = useRef<number>(-1);
 
   // Ref per tracciare la velocità corrente in tempo reale
   const speedRef = useRef<number>(propSpeed);
@@ -91,7 +90,6 @@ const GuitarProPlayer = forwardRef<GuitarProPlayerHandle, Props>(function Guitar
         /* noop */
       }
     }
-    currentStepRef.current = -1;
     if (scrollRef.current) scrollRef.current.scrollTop = 0;
   };
 
@@ -154,7 +152,10 @@ const GuitarProPlayer = forwardRef<GuitarProPlayerHandle, Props>(function Guitar
             file,
             fontDirectory: "/alphatab/font/",
           },
-          display: { scale: 0.72, layoutMode: alphaTab.LayoutMode.Page },
+          display: { 
+            scale: 0.78, 
+            padding: [20, 10, 40, 10], // Padding nativo per evitare tagli sui bordi
+          },
           player: {
             enablePlayer: true,
             enableCursor: true,
@@ -162,9 +163,7 @@ const GuitarProPlayer = forwardRef<GuitarProPlayerHandle, Props>(function Guitar
             enableElementHighlighting: true,
             enableUserInteraction: true,
             scrollElement: scrollRef.current,
-            scrollMode: alphaTab.ScrollMode.Off,
-            nativeBrowserSmoothScroll: true,
-            scrollOffsetY: -10,
+            scrollMode: alphaTab.ScrollMode.Continuous, // SCORRIMENTO CONTINUO FLUIDO NATIVO
             soundFont: null,
           },
         });
@@ -217,36 +216,9 @@ const GuitarProPlayer = forwardRef<GuitarProPlayerHandle, Props>(function Guitar
           onFinished?.();
         });
 
-        // PARAMETRI SCORRIMENTO AUTOMATICO OGNI 3 RIGHI
-        const BASE_BPM = 94;
-        const BASE_SECONDS = 5;
-        const THREE_STAFFS_HEIGHT_PX = 520;
-
         api.playerStateChanged.on((e: any) => {
           if (e.state === 0 && api.timePosition === 0) {
-            currentStepRef.current = -1;
             if (scrollRef.current) scrollRef.current.scrollTop = 0;
-          }
-        });
-
-        api.playerPositionChanged.on((e: any) => {
-          const realTimeSec = e.currentTime / 1000;
-          if (realTimeSec <= 0) return;
-
-          const currentSpeed = speedRef.current > 0 ? speedRef.current : 1;
-          const songTimeSec = realTimeSec * currentSpeed;
-
-          const currentBpm = api.score?.tempo ?? BASE_BPM;
-          const dynamicInterval = BASE_SECONDS * (BASE_BPM / currentBpm);
-          const step = Math.floor(songTimeSec / dynamicInterval);
-
-          if (step !== currentStepRef.current) {
-            currentStepRef.current = step;
-            const container = scrollRef.current;
-            if (container) {
-              const targetY = step * THREE_STAFFS_HEIGHT_PX;
-              container.scrollTo({ top: targetY, behavior: "smooth" });
-            }
           }
         });
 
@@ -270,7 +242,7 @@ const GuitarProPlayer = forwardRef<GuitarProPlayerHandle, Props>(function Guitar
       {error ? (
         <p className="px-5 py-6 text-xs font-semibold uppercase tracking-widest text-destructive">{error}</p>
       ) : (
-        <div ref={scrollRef} className="h-[520px] overflow-y-auto overflow-x-hidden bg-white relative">
+        <div ref={scrollRef} className="h-[520px] overflow-y-auto overflow-x-hidden bg-white relative flex justify-center">
           {!ready && (
             <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/80 backdrop-blur-sm">
               <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-primary">
@@ -279,7 +251,7 @@ const GuitarProPlayer = forwardRef<GuitarProPlayerHandle, Props>(function Guitar
               </div>
             </div>
           )}
-          <div ref={hostRef} />
+          <div ref={hostRef} className="w-full max-w-4xl" />
         </div>
       )}
     </div>

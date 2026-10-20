@@ -223,23 +223,39 @@ const PRESETS: Record<Exclude<PresetKey, "CUSTOM">, GuitarString[]> = {
 };
 
 const CUSTOM_NOTE_OPTIONS = [
+  // Ottava 1 (Per accordature ribassate estreme, Drop B, Drop A, ecc.)
+  { name: "C", octave: "C1", freq: 32.70 },
+  { name: "D", octave: "D1", freq: 36.71 },
+  { name: "E", octave: "E1", freq: 41.20 },
+  { name: "F", octave: "F1", freq: 43.65 },
+  { name: "G", octave: "G1", freq: 49.00 },
+  { name: "A", octave: "A1", freq: 55.00 },
+  { name: "B", octave: "B1", freq: 61.74 },
+  
+  // Ottava 2 (Standard gravi e Drop C/D)
   { name: "C", octave: "C2", freq: 65.41 },
   { name: "D", octave: "D2", freq: 73.42 },
   { name: "E", octave: "E2", freq: 82.41 },
   { name: "F", octave: "F2", freq: 87.31 },
-  { name: "G", octave: "G2", freq: 98.0 },
-  { name: "A", octave: "A2", freq: 110.0 },
+  { name: "G", octave: "G2", freq: 98.00 },
+  { name: "A", octave: "A2", freq: 110.00 },
   { name: "B", octave: "B2", freq: 123.47 },
+  
+  // Ottava 3 (Medie)
   { name: "C", octave: "C3", freq: 130.81 },
   { name: "D", octave: "D3", freq: 146.83 },
   { name: "E", octave: "E3", freq: 164.81 },
   { name: "F", octave: "F3", freq: 174.61 },
-  { name: "G", octave: "G3", freq: 196.0 },
-  { name: "A", octave: "A3", freq: 220.0 },
+  { name: "G", octave: "G3", freq: 196.00 },
+  { name: "A", octave: "A3", freq: 220.00 },
   { name: "B", octave: "B3", freq: 246.94 },
+  
+  // Ottava 4 (Acute e cantini)
   { name: "C", octave: "C4", freq: 261.63 },
   { name: "D", octave: "D4", freq: 293.66 },
-  { name: "E", octave: "E4", freq: 329.63 },
+  { name: "E", octave: "E4", freq: 329.63 }, // 1ª corda Standard
+  { name: "F", octave: "F4", freq: 349.23 },
+  { name: "G", octave: "G4", freq: 392.00 }, // Limite massimo di tensione per la 1ª corda
 ];
 
 function autoCorrelate(buf: Float32Array, sampleRate: number): number {
@@ -420,7 +436,7 @@ function TunerPage() {
     } else if (started && isAudioReady && analyserRef.current) {
       loop();
     }
-  }, [tunerActive, started, isAudioReady, octaveShift, semitoneShift]);
+}, [tunerActive, started, isAudioReady, octaveShift, semitoneShift, preset, customStrings]);
 
   function loop() {
     if (!tunerActive) return;
