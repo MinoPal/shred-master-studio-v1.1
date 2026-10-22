@@ -5,15 +5,9 @@ import {
   Mic,
   AlertTriangle,
   Sparkles,
-  Settings2,
-  Power,
   Info,
-  SlidersHorizontal,
-  RotateCcw,
-  Music2,
-  ChevronDown,
   Clock,
-  ChevronRight,
+  Power,
 } from "lucide-react";
 
 import { useLanguage } from "../context/LanguageContext";
@@ -50,34 +44,20 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     comingSoonNotice: "Camera is currently active as a visual mirror. Automated AI posture analysis is coming soon!",
     leftHand: "Left (Fretting)",
     rightHand: "Right (Picking)",
-    alignLeft: "POSITION FRETTING HAND IN FRONT OF CAMERA",
-    alignRight: "POSITION PICKING HAND IN FRONT OF CAMERA",
     enableCamMic: "Enable Cam + Mic",
     camError: "Camera access denied. Enable permissions for the posture check.",
     micError: "Microphone access denied. The tuner needs the mic to hear you.",
     enablePrompt: "Please enable Camera & Microphone first by clicking the orange button above to use the tuner.",
     enableNow: "Enable Now",
-    tunerOn: "TUNER ON",
-    tunerOff: "TUNER OFF",
+    tunerOn: "ON",
+    tunerOff: "OFF",
     custom: "Custom",
-    pitchShift: "Pitch Shift",
-    pitchShiftTitle: "Pitch Shift / Transpose",
-    octave: "Octaves",
-    semitone: "Semitones",
-    resetShift: "Reset Pitch Shift",
-    muted: "Muted",
     awaiting: "Awaiting signal...",
     stringLabel: "String",
-    off: "OFF",
-    tunerDisabled: "Tuner Disabled",
-    inTune: "● In Tune",
-    flat: "Flat",
-    sharp: "Sharp",
+    tunerDisabled: "Tuner Disabled (Turn ON to start)",
     pluckString: "Pluck an open string",
     tunerTip: "Tip: Bring your device microphone close to the amplifier or guitar for optimal detection.",
     postureTitle: "Hand Posture Guide",
-    frettingHandBtn: "Fretting Hand (Left)",
-    pickingHandBtn: "Picking Hand (Right)",
     leftTip1Title: "Arch your fingers",
     leftTip1Text: "Ensure your fingers hit the fretboard vertically to prevent unwanted string muting.",
     leftTip2Title: "Thumb positioning",
@@ -101,34 +81,20 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     comingSoonNotice: "La fotocamera è attiva come specchio visivo. La funzione di analisi automatica della postura tramite IA è attualmente in sviluppo.",
     leftHand: "Sinistra (Tasto)",
     rightHand: "Destra (Plettro)",
-    alignLeft: "POSIZIONA LA MANO SULLA TASTIERA DI FRONTE ALLA CAM",
-    alignRight: "POSIZIONA LA MANO SUL PONTE DI FRONTE ALLA CAM",
     enableCamMic: "Attiva Cam + Microfono",
     camError: "Accesso alla fotocamera negato. Abilita i permessi per il controllo della postura.",
     micError: "Accesso al microfono negato. L'accordatore ha bisogno del microfono per rilevare le note.",
     enablePrompt: "Per favore attiva prima la fotocamera e il microfono cliccando sul pulsante arancione per usare l'accordatore.",
     enableNow: "Attiva Ora",
-    tunerOn: "ACCORDATORE ON",
-    tunerOff: "ACCORDATORE OFF",
+    tunerOn: "ON",
+    tunerOff: "OFF",
     custom: "Personalizzato",
-    pitchShift: "Pitch Shift",
-    pitchShiftTitle: "Pitch Shift / Trasposizione",
-    octave: "Ottave",
-    semitone: "Semitoni",
-    resetShift: "Ripristina Pitch Shift",
-    muted: "Muto",
     awaiting: "In attesa del segnale...",
     stringLabel: "Corda",
-    off: "OFF",
-    tunerDisabled: "Accordatore Disattivato",
-    inTune: "● In Accordo",
-    flat: "Calante (Flat)",
-    sharp: "Crescente (Sharp)",
+    tunerDisabled: "Accordatore Disattivato (Attiva ON per iniziare)",
     pluckString: "Suona una corda a vuoto",
     tunerTip: "Suggerimento: avvicina il microfono del dispositivo all'amplificatore o alla chitarra per una ricezione ottimale.",
     postureTitle: "Guida alla Postura delle Mani",
-    frettingHandBtn: "Mano sulla Tastiera (Sinistra)",
-    pickingHandBtn: "Mano sul Plettro (Destra)",
     leftTip1Title: "Incurva le dita",
     leftTip1Text: "Assicurati che le dita tocchino la tastiera verticalmente per evitare di stoppare involontariamente le altre corde.",
     leftTip2Title: "Posizione del pollice",
@@ -152,34 +118,20 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     comingSoonNotice: "La cámara está activa como espejo visual. El análisis automático de postura con IA está actualmente en desarrollo.",
     leftHand: "Izquierda (Mástil)",
     rightHand: "Derecha (Púa)",
-    alignLeft: "POSICIONA LA MANO EN EL MÁSTIL FRENTE A LA CÁMARA",
-    alignRight: "POSICIONA LA MANO EN EL PUENTE FRENTE A LA CÁMARA",
     enableCamMic: "Activar Cam + Micrófono",
     camError: "Acceso a la cámara denegado. Habilita los permisos para la guía de postura.",
     micError: "Acceso al micrófono denegado. El afinador necesita el micrófono para escuchar.",
     enablePrompt: "Por favor, activa primero la cámara y el micrófono haciendo clic en el botón naranja superior para usar el afinador.",
     enableNow: "Activar Ahora",
-    tunerOn: "AFINADOR ON",
-    tunerOff: "AFINADOR OFF",
+    tunerOn: "ON",
+    tunerOff: "OFF",
     custom: "Personalizado",
-    pitchShift: "Pitch Shift",
-    pitchShiftTitle: "Pitch Shift / Transposición",
-    octave: "Octavas",
-    semitone: "Semitones",
-    resetShift: "Restablecer Pitch Shift",
-    muted: "Silenciado",
     awaiting: "Esperando señal...",
     stringLabel: "Cuerda",
-    off: "OFF",
     tunerDisabled: "Afinador Desactivado",
-    inTune: "● Afinado",
-    flat: "Bajo (Flat)",
-    sharp: "Alto (Sharp)",
     pluckString: "Toca una cuerda al aire",
     tunerTip: "Consejo: Acerca el micrófono de tu dispositivo al amplificador o a la guitarra para una mejor recepción.",
     postureTitle: "Guía de Postura de las Manos",
-    frettingHandBtn: "Mano del Mástil (Izquierda)",
-    pickingHandBtn: "Mano de la Púa (Derecha)",
     leftTip1Title: "Arquea los dedos",
     leftTip1Text: "Asegúrate de que tus dedos pisen el diapasón de forma vertical para evitar silenciar cuerdas adyacentes.",
     leftTip2Title: "Posición del pulgar",
@@ -190,7 +142,7 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     rightTip1Text: "Apoya suavemente el antebrazo sobre el cuerpo de la guitarra, manteniendo la muñeca flexible.",
     rightTip2Title: "Ángulo de la púa",
     rightTip2Text: "Inclina ligeramente la púa (unos 45°) respecto a las cuerdas para reducir la resistencia y ganar velocidad.",
-    rightTip3Title: "Movimiento mínimo",
+    rightTip3Title: "Movimento mínimo",
     rightTip3Text: "Realiza movimientos pequeños y controlados desde la muñeca en lugar de usar todo el brazo.",
   },
 };
@@ -223,40 +175,65 @@ const PRESETS: Record<Exclude<PresetKey, "CUSTOM">, GuitarString[]> = {
 };
 
 const CUSTOM_NOTE_OPTIONS = [
-  // Ottava 1 (Per accordature ribassate estreme, Drop B, Drop A, ecc.)
   { name: "C", octave: "C1", freq: 32.70 },
+  { name: "Db", octave: "Db1", freq: 34.65 },
   { name: "D", octave: "D1", freq: 36.71 },
+  { name: "Eb", octave: "Eb1", freq: 38.89 },
   { name: "E", octave: "E1", freq: 41.20 },
   { name: "F", octave: "F1", freq: 43.65 },
+  { name: "Gb", octave: "Gb1", freq: 46.25 },
   { name: "G", octave: "G1", freq: 49.00 },
+  { name: "Ab", octave: "Ab1", freq: 51.91 },
   { name: "A", octave: "A1", freq: 55.00 },
+  { name: "Bb", octave: "Bb1", freq: 58.27 },
   { name: "B", octave: "B1", freq: 61.74 },
-  
-  // Ottava 2 (Standard gravi e Drop C/D)
   { name: "C", octave: "C2", freq: 65.41 },
+  { name: "Db", octave: "Db2", freq: 69.30 },
   { name: "D", octave: "D2", freq: 73.42 },
+  { name: "Eb", octave: "Eb2", freq: 77.78 },
   { name: "E", octave: "E2", freq: 82.41 },
   { name: "F", octave: "F2", freq: 87.31 },
+  { name: "Gb", octave: "Gb2", freq: 92.50 },
   { name: "G", octave: "G2", freq: 98.00 },
+  { name: "Ab", octave: "Ab2", freq: 103.83 },
   { name: "A", octave: "A2", freq: 110.00 },
+  { name: "Bb", octave: "Bb2", freq: 116.54 },
   { name: "B", octave: "B2", freq: 123.47 },
-  
-  // Ottava 3 (Medie)
   { name: "C", octave: "C3", freq: 130.81 },
+  { name: "Db", octave: "Db3", freq: 138.59 },
   { name: "D", octave: "D3", freq: 146.83 },
+  { name: "Eb", octave: "Eb3", freq: 155.56 },
   { name: "E", octave: "E3", freq: 164.81 },
   { name: "F", octave: "F3", freq: 174.61 },
+  { name: "Gb", octave: "Gb3", freq: 185.00 },
   { name: "G", octave: "G3", freq: 196.00 },
+  { name: "Ab", octave: "Ab3", freq: 207.65 },
   { name: "A", octave: "A3", freq: 220.00 },
+  { name: "Bb", octave: "Bb3", freq: 233.08 },
   { name: "B", octave: "B3", freq: 246.94 },
-  
-  // Ottava 4 (Acute e cantini)
   { name: "C", octave: "C4", freq: 261.63 },
+  { name: "Db", octave: "Db4", freq: 277.18 },
   { name: "D", octave: "D4", freq: 293.66 },
-  { name: "E", octave: "E4", freq: 329.63 }, // 1ª corda Standard
+  { name: "Eb", octave: "Eb4", freq: 311.13 },
+  { name: "E", octave: "E4", freq: 329.63 },
   { name: "F", octave: "F4", freq: 349.23 },
-  { name: "G", octave: "G4", freq: 392.00 }, // Limite massimo di tensione per la 1ª corda
+  { name: "Gb", octave: "Gb4", freq: 369.99 },
+  { name: "G", octave: "G4", freq: 392.00 },
 ];
+
+const NOTE_NAMES_CHROMATIC = ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"];
+
+function getAdjacentNotes(currentName: string) {
+  const clean = currentName.replace(/[^A-Ga-g#b]/g, "").toUpperCase();
+  const idx = NOTE_NAMES_CHROMATIC.indexOf(clean);
+  if (idx === -1) return { prev: "", next: "" };
+  const prevIdx = (idx - 1 + 12) % 12;
+  const nextIdx = (idx + 1) % 12;
+  return {
+    prev: NOTE_NAMES_CHROMATIC[prevIdx],
+    next: NOTE_NAMES_CHROMATIC[nextIdx],
+  };
+}
 
 function autoCorrelate(buf: Float32Array, sampleRate: number): number {
   let SIZE = buf.length;
@@ -320,20 +297,14 @@ function nearestString(freq: number, currentStrings: GuitarString[]) {
   return { string: best, cents };
 }
 
-function shiftFrequency(freq: number, totalSemitones: number): number {
-  return freq * Math.pow(2, totalSemitones / 12);
-}
-
 const SMOOTHING_FACTOR = 0.15;
 
 function TunerPage() {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const dropdownRef = useRef<HTMLDivElement>(null);
   const smoothedCentsRef = useRef<number>(0);
 
   const { lang, language } = useLanguage() as any;
   const rawLang = (lang || language || "en").toString().toLowerCase();
-
   const currentLang: Language = rawLang.includes("it") ? "it" : rawLang.includes("es") ? "es" : "en";
 
   const t = useCallback(
@@ -348,18 +319,19 @@ function TunerPage() {
   const [started, setStarted] = useState(false);
   const [isAudioReady, setIsAudioReady] = useState(false);
 
-  const [tunerActive, setTunerActive] = useState(false);
+  const [tunerActive, setTunerActive] = useState(true);
   const [showPrompt, setShowPrompt] = useState(false);
 
-  const [octaveShift, setOctaveShift] = useState<number>(0);
-  const [semitoneShift, setSemitoneShift] = useState<number>(0);
-  const [isShiftDropdownOpen, setIsShiftDropdownOpen] = useState(false);
-
   const [pitch, setPitch] = useState<number | null>(null);
-  const [note, setNote] = useState<{ name: string; octave: string; cents: number } | null>(null);
+  const [note, setNote] = useState<{ name: string; octave: string; cents: number } | null>({
+    name: "E",
+    octave: "E2",
+    cents: 0,
+  });
 
   const [preset, setPreset] = useState<PresetKey>("E_STANDARD");
   const [customStrings, setCustomStrings] = useState<GuitarString[]>([...PRESETS.E_STANDARD]);
+  const [displayMode, setDisplayMode] = useState<"cents" | "hz">("cents");
 
   const [handView, setHandView] = useState<"LEFT" | "RIGHT">("LEFT");
 
@@ -368,23 +340,26 @@ function TunerPage() {
   const ctxRef = useRef<AudioContext | null>(null);
   const bufRef = useRef<Float32Array | null>(null);
 
-  const totalSemitoneShift = octaveShift * 12 + semitoneShift;
-  const baseStrings = preset === "CUSTOM" ? customStrings : PRESETS[preset];
+  const activeStrings = preset === "CUSTOM" ? customStrings : PRESETS[preset];
 
-  const activeStrings = baseStrings.map((s) => ({
-    ...s,
-    freq: shiftFrequency(s.freq, totalSemitoneShift),
-  }));
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsShiftDropdownOpen(false);
-      }
+  const handleSelectPreset = (newPreset: PresetKey) => {
+    setPreset(newPreset);
+    const firstStr = PRESETS[newPreset]?.[0];
+    if (firstStr) {
+      setNote({ name: firstStr.name, octave: firstStr.octave, cents: 0 });
     }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  };
+
+  const handleCustomNoteChange = (index: number, selectedOctave: string) => {
+    const found = CUSTOM_NOTE_OPTIONS.find((opt) => opt.octave === selectedOctave);
+    if (!found) return;
+    const updated = [...customStrings];
+    updated[index] = found;
+    setCustomStrings(updated);
+    if (index === 0) {
+      setNote({ name: found.name, octave: found.octave, cents: 0 });
+    }
+  };
 
   async function start() {
     setStarted(true);
@@ -436,7 +411,7 @@ function TunerPage() {
     } else if (started && isAudioReady && analyserRef.current) {
       loop();
     }
-}, [tunerActive, started, isAudioReady, octaveShift, semitoneShift, preset, customStrings]);
+  }, [tunerActive, started, isAudioReady, preset, customStrings]);
 
   function loop() {
     if (!tunerActive) return;
@@ -449,19 +424,10 @@ function TunerPage() {
     if (f > 15 && f < 4000) {
       const { string, cents: rawCents } = nearestString(f, activeStrings);
       
-      // Sesta corda lasciata naturale, 1°-5° corda con smoothing
-      const isSixthString = string === activeStrings[0] || f < 95;
-
-      let finalCents: number;
-      if (isSixthString) {
-        finalCents = rawCents;
-        smoothedCentsRef.current = rawCents;
-      } else {
-        const prev = smoothedCentsRef.current;
-        const smoothed = prev + (rawCents - prev) * SMOOTHING_FACTOR;
-        finalCents = Math.abs(smoothed) < 1.5 ? 0 : smoothed;
-        smoothedCentsRef.current = finalCents;
-      }
+      const prev = smoothedCentsRef.current;
+      const smoothed = prev + (rawCents - prev) * SMOOTHING_FACTOR;
+      const finalCents = Math.abs(smoothed) < 1.5 ? 0 : smoothed;
+      smoothedCentsRef.current = finalCents;
 
       setPitch(f);
       setNote({ name: string.name, octave: string.octave, cents: finalCents });
@@ -477,45 +443,21 @@ function TunerPage() {
     s?.getTracks().forEach((t) => t.stop());
   }, []);
 
-  const handleCustomNoteChange = (index: number, selectedOctave: string) => {
-    const found = CUSTOM_NOTE_OPTIONS.find((opt) => opt.octave === selectedOctave);
-    if (!found) return;
-    const updated = [...customStrings];
-    updated[index] = found;
-    setCustomStrings(updated);
-  };
-
-  const adjustOctave = (delta: number) => {
-    setOctaveShift((prev) => Math.min(12, Math.max(-12, prev + delta)));
-  };
-
-  const adjustSemitone = (delta: number) => {
-    setSemitoneShift((prev) => Math.min(11, Math.max(-11, prev + delta)));
-  };
-
-  const resetShift = () => {
-    setOctaveShift(0);
-    setSemitoneShift(0);
-  };
-
   const cents = note?.cents ?? 0;
   const inTune = Math.abs(cents) < 4;
-  const barPos = Math.max(-48, Math.min(48, cents));
+  
+  const barPos = Math.max(-50, Math.min(50, cents));
+  const dotPercent = 50 + barPos;
 
-  const getShiftBadgeLabel = () => {
-    if (octaveShift === 0 && semitoneShift === 0) return "0 oct";
-    const parts = [];
-    if (octaveShift !== 0) parts.push(`${octaveShift > 0 ? `+${octaveShift}` : octaveShift} oct`);
-    if (semitoneShift !== 0) parts.push(`${semitoneShift > 0 ? `+${semitoneShift}` : semitoneShift} st`);
-    return parts.join(" ");
-  };
+  const formatNoteClean = (n: string) => n.replace("b", "♭").replace("#", "♯");
+  const adjacent = note ? getAdjacentNotes(note.name) : { prev: "C#", next: "D#" };
 
   return (
     <div className="flex flex-col gap-6 px-5 pt-8 pb-12 max-w-4xl mx-auto">
       {tunerActive && (
         <style font-mono>{`
           nav, [role="navigation"], .floating-menu, footer {
-            display: none !important;
+            display: !important;
             opacity: 0 !important;
             pointer-events: none !important;
           }
@@ -537,7 +479,6 @@ function TunerPage() {
       <section className="relative overflow-hidden rounded-3xl border border-border bg-black" style={{ aspectRatio: "16 / 9" }}>
         <video ref={videoRef} playsInline muted className="absolute inset-0 h-full w-full object-cover" style={{ transform: "scaleX(-1)" }} />
 
-        {/* OVERLAY VISUAL MIRROR + BANNER INFORMAZIONI CHIARO */}
         <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-between p-4">
           <div className="w-full flex justify-between items-center">
             <div className="flex gap-1.5 rounded-full border border-primary/40 bg-background/80 p-1 backdrop-blur-md pointer-events-auto">
@@ -564,7 +505,6 @@ function TunerPage() {
             </span>
           </div>
 
-          {/* AVVISO CHIARO STATO FEATURE */}
           <div className="max-w-md rounded-2xl border border-amber-500/40 bg-black/80 p-3 backdrop-blur-md text-center shadow-2xl">
             <div className="flex items-center justify-center gap-1.5 text-amber-400 font-bold text-xs mb-1">
               <Clock className="h-4 w-4 animate-spin" />
@@ -606,30 +546,22 @@ function TunerPage() {
         </div>
       )}
 
-      {/* TUNER PANEL */}
-      <section className="rounded-3xl border border-border bg-card p-6 shadow-2xl">
-        <div className="flex flex-wrap items-center justify-between gap-3 pb-5 border-b border-border">
+      {/* TUNER PANEL - NEURAL DSP STYLE */}
+      <section className="rounded-2xl border border-zinc-800 bg-[#161618] p-6 shadow-2xl text-zinc-200 select-none">
+        
+        {/* Top Control Bar inside Tuner */}
+        <div className="flex flex-wrap items-center justify-between gap-3 pb-4 mb-6 border-b border-zinc-800">
           <div className="flex items-center gap-2 flex-wrap">
-            <button
-              onClick={handleToggleTuner}
-              className={`flex items-center gap-1.5 rounded-xl px-4 py-1.5 text-xs font-bold transition-all ${
-                tunerActive
-                  ? "bg-emerald-600 text-white shadow-[0_0_15px_rgba(52,137,72,0.6)]"
-                  : "bg-muted text-muted-foreground border border-border hover:text-foreground"
-              }`}
-            >
-              <Power className="h-3.5 w-3.5" />
-              {tunerActive ? t("tunerOn") : t("tunerOff")}
-            </button>
+            <span className="text-xs font-bold uppercase tracking-wider text-zinc-400 mr-2">Tuner</span>
 
             {(["E_STANDARD", "DROP_D", "DROP_C"] as const).map((k) => (
               <button
                 key={k}
-                onClick={() => setPreset(k)}
-                className={`rounded-xl px-3.5 py-1.5 text-xs font-bold transition-all ${
+                onClick={() => handleSelectPreset(k)}
+                className={`rounded-lg px-3 py-1 text-xs font-semibold transition-all ${
                   preset === k
-                    ? "bg-primary text-primary-foreground shadow-neon"
-                    : "border border-border bg-background/50 text-muted-foreground hover:text-foreground"
+                    ? "bg-zinc-700 text-white shadow"
+                    : "bg-zinc-900 text-zinc-400 hover:text-white"
                 }`}
               >
                 {k.replace("_", " ")}
@@ -637,110 +569,50 @@ function TunerPage() {
             ))}
 
             <button
-              onClick={() => setPreset("CUSTOM")}
-              className={`flex items-center gap-1 rounded-xl px-3.5 py-1.5 text-xs font-bold transition-all ${
+              onClick={() => {
+                setPreset("CUSTOM");
+                const firstCustom = customStrings[0];
+                if (firstCustom) {
+                  setNote({ name: firstCustom.name, octave: firstCustom.octave, cents: 0 });
+                }
+              }}
+              className={`rounded-lg px-3 py-1 text-xs font-semibold transition-all ${
                 preset === "CUSTOM"
-                  ? "bg-primary text-primary-foreground shadow-neon"
-                  : "border border-border bg-background/50 text-muted-foreground hover:text-foreground"
+                  ? "bg-zinc-700 text-white shadow"
+                  : "bg-zinc-900 text-zinc-400 hover:text-white"
               }`}
             >
-              <Settings2 className="h-3.5 w-3.5" /> {t("custom")}
+              {t("custom")}
             </button>
-
-            {/* PITCH SHIFT DROPDOWN */}
-            <div className="relative" ref={dropdownRef}>
-              <button
-                onClick={() => setIsShiftDropdownOpen((prev) => !prev)}
-                className={`flex items-center gap-1.5 rounded-xl px-3.5 py-1.5 text-xs font-bold transition-all border ${
-                  octaveShift !== 0 || semitoneShift !== 0
-                    ? "bg-amber-500/20 border-amber-500 text-amber-300 shadow-[0_0_10px_rgba(245,158,11,0.3)]"
-                    : "border-border bg-background/50 text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                <Music2 className="h-3.5 w-3.5" />
-                <span>{t("pitchShift")}</span>
-                <span className="ml-1 rounded-md bg-background/80 px-1.5 py-0.5 text-[10px] font-mono border border-border">
-                  {getShiftBadgeLabel()}
-                </span>
-                <ChevronDown className={`h-3 w-3 transition-transform ${isShiftDropdownOpen ? "rotate-180" : ""}`} />
-              </button>
-
-              {isShiftDropdownOpen && (
-                <div className="absolute left-0 top-full mt-2 z-50 w-72 rounded-2xl border border-border bg-card p-4 shadow-2xl backdrop-blur-xl">
-                  <div className="flex items-center justify-between pb-3 mb-3 border-b border-border">
-                    <div className="flex items-center gap-1.5">
-                      <SlidersHorizontal className="h-4 w-4 text-primary" />
-                      <span className="text-xs font-bold">{t("pitchShiftTitle")}</span>
-                    </div>
-                    <span className="text-[10px] font-mono font-bold text-muted-foreground">{getShiftBadgeLabel()}</span>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-2">
-                    <button
-                      onClick={() => adjustOctave(1)}
-                      className="flex flex-col items-center justify-center rounded-xl border border-border bg-background/60 p-2.5 text-xs font-bold hover:bg-primary/20 hover:border-primary active:scale-95 transition-all"
-                    >
-                      <span className="text-primary text-sm font-black">+1 Oct</span>
-                      <span className="text-[10px] text-muted-foreground font-mono">{t("octave")}: {octaveShift > 0 ? `+${octaveShift}` : octaveShift}</span>
-                    </button>
-
-                    <button
-                      onClick={() => adjustOctave(-1)}
-                      className="flex flex-col items-center justify-center rounded-xl border border-border bg-background/60 p-2.5 text-xs font-bold hover:bg-primary/20 hover:border-primary active:scale-95 transition-all"
-                    >
-                      <span className="text-primary text-sm font-black">-1 Oct</span>
-                      <span className="text-[10px] text-muted-foreground font-mono">{t("octave")}: {octaveShift > 0 ? `+${octaveShift}` : octaveShift}</span>
-                    </button>
-
-                    <button
-                      onClick={() => adjustSemitone(1)}
-                      className="flex flex-col items-center justify-center rounded-xl border border-border bg-background/60 p-2.5 text-xs font-bold hover:bg-primary/20 hover:border-primary active:scale-95 transition-all"
-                    >
-                      <span className="text-foreground text-sm font-black">+1 Semi</span>
-                      <span className="text-[10px] text-muted-foreground font-mono">{t("semitone")}: {semitoneShift > 0 ? `+${semitoneShift}` : semitoneShift}</span>
-                    </button>
-
-                    <button
-                      onClick={() => adjustSemitone(-1)}
-                      className="flex flex-col items-center justify-center rounded-xl border border-border bg-background/60 p-2.5 text-xs font-bold hover:bg-primary/20 hover:border-primary active:scale-95 transition-all"
-                    >
-                      <span className="text-foreground text-sm font-black">-1 Semi</span>
-                      <span className="text-[10px] text-muted-foreground font-mono">{t("semitone")}: {semitoneShift > 0 ? `+${semitoneShift}` : semitoneShift}</span>
-                    </button>
-                  </div>
-
-                  {(octaveShift !== 0 || semitoneShift !== 0) && (
-                    <button
-                      onClick={resetShift}
-                      className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl border border-amber-500/40 bg-amber-500/10 py-1.5 text-xs font-bold text-amber-300 hover:bg-amber-500/20 active:scale-95 transition-all"
-                    >
-                      <RotateCcw className="h-3.5 w-3.5" />
-                      {t("resetShift")}
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
           </div>
 
+          {/* ON / OFF Switch Toggle */}
           <div className="flex items-center gap-2">
-            <Mic className={`h-4 w-4 ${started && tunerActive ? "text-emerald-500 animate-pulse" : "text-muted-foreground"}`} />
-            <span className="text-xs font-semibold text-muted-foreground">
-              {!tunerActive ? t("tunerDisabled") : pitch ? `${pitch.toFixed(1)} Hz` : t("awaiting")}
-            </span>
+            <span className="text-xs font-bold text-zinc-400">Tuner</span>
+            <button
+              onClick={handleToggleTuner}
+              className={`flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-bold transition-all ${
+                tunerActive
+                  ? "bg-emerald-600 text-white shadow-[0_0_10px_rgba(52,211,153,0.4)]"
+                  : "bg-zinc-800 text-zinc-400 border border-zinc-700 hover:text-white"
+              }`}
+            >
+              <Power className="h-3.5 w-3.5" />
+              {tunerActive ? t("tunerOn") : t("tunerOff")}
+            </button>
           </div>
         </div>
 
         {/* CUSTOM TUNING SELECTORS */}
         {preset === "CUSTOM" && (
-          <div className="mt-4 grid grid-cols-6 gap-2 rounded-2xl border border-border bg-background/40 p-3">
+          <div className="mb-6 grid grid-cols-6 gap-2 rounded-xl bg-zinc-900/80 p-3 border border-zinc-800">
             {customStrings.map((str, idx) => (
               <div key={idx} className="flex flex-col items-center gap-1">
-                <span className="text-[10px] font-bold text-muted-foreground uppercase">{t("stringLabel")} {6 - idx}</span>
+                <span className="text-[10px] font-bold text-zinc-500 uppercase">{t("stringLabel")} {6 - idx}</span>
                 <select
                   value={str.octave}
                   onChange={(e) => handleCustomNoteChange(idx, e.target.value)}
-                  className="w-full rounded-lg border border-border bg-card text-center text-xs font-bold py-1 focus:border-primary focus:outline-none"
+                  className="w-full rounded-md border border-zinc-700 bg-zinc-800 text-center text-xs font-bold py-1 text-zinc-200 focus:border-emerald-500 focus:outline-none"
                 >
                   {CUSTOM_NOTE_OPTIONS.map((opt) => (
                     <option key={opt.octave} value={opt.octave}>
@@ -754,51 +626,102 @@ function TunerPage() {
         )}
 
         {/* SUGGERIMENTO MICROFONO */}
-        <div className="mt-4 flex items-center gap-2.5 rounded-2xl border border-border bg-background/50 p-3 text-xs text-muted-foreground">
-          <Info className="h-4 w-4 shrink-0 text-primary" />
+        <div className="mb-6 flex items-center gap-2.5 rounded-xl border border-zinc-800 bg-zinc-900/50 p-3 text-xs text-zinc-400">
+          <Info className="h-4 w-4 shrink-0 text-emerald-400" />
           <span>{t("tunerTip")}</span>
         </div>
 
-        {/* VISUAL TUNER METER */}
-        <div className="mt-6 flex flex-col items-center">
-          <div className="text-center h-20 flex flex-col justify-center">
-            {tunerActive && note ? (
-              <>
-                <div className="font-display text-6xl font-black tracking-tight text-foreground">
-                  {note.name}<span className="text-2xl font-bold text-muted-foreground">{note.octave.slice(-1)}</span>
-                </div>
-                <div className={`text-xs font-bold uppercase mt-1 ${inTune ? "text-emerald-500" : "text-amber-500"}`}>
-                  {inTune ? t("inTune") : cents < 0 ? `${t("flat")} (${cents.toFixed(1)}c)` : `${t("sharp")} (+${cents.toFixed(1)}c)`}
-                </div>
-              </>
-            ) : (
-              <p className="text-sm text-muted-foreground font-semibold">
-                {!tunerActive ? t("tunerDisabled") : t("pluckString")}
-              </p>
-            )}
+        {/* MAIN VISUAL TUNER SCREEN */}
+        <div className="flex flex-col items-center py-2">
+          
+          {/* Top Indicators & Ingrandimento Freccette Direzionali (3x) */}
+          <div className="w-full max-w-xl flex justify-between items-center px-4 mb-3 text-xs font-mono text-zinc-500">
+            <span>-50</span>
+            <span className={`font-bold transition-colors select-none ${cents < -2 ? "text-emerald-400 font-black text-2xl" : "text-zinc-600 text-xl"}`}>&gt;</span>
+            <span className="text-zinc-300 font-semibold">
+              {displayMode === "cents" 
+                ? (cents !== 0 ? (cents > 0 ? `+${cents.toFixed(1)}` : cents.toFixed(1)) : "0.0")
+                : (pitch ? `${pitch.toFixed(1)} Hz` : "0.0 Hz")}
+            </span>
+            <span className={`font-bold transition-colors select-none ${cents > 2 ? "text-emerald-400 font-black text-2xl" : "text-zinc-600 text-xl"}`}>&lt;</span>
+            <span>+50</span>
           </div>
 
-          <div className="relative mt-4 h-3 w-full max-w-md rounded-full bg-secondary overflow-hidden border border-border">
+          {/* Central Line & Moving Ball Meter */}
+          <div className="relative w-full max-w-xl h-12 flex items-center px-2">
+            <div className="absolute inset-x-2 h-0.5 bg-zinc-700" />
             <div
-              className={`absolute top-0 bottom-0 w-2 transition-all duration-75 rounded-full ${
-                inTune ? "bg-emerald-500 shadow-[0_0_10px_rgba(52,137,72,0.8)]" : "bg-primary shadow-neon"
-              }`}
-              style={{
-                left: `calc(50% + ${barPos}% - 4px)`,
-              }}
-            />
+              className="absolute -translate-x-1/2 flex items-center justify-center transition-all duration-75"
+              style={{ left: `${dotPercent}%` }}
+            >
+              <div className={`h-7 w-7 rounded-full border-2 flex items-center justify-center transition-all shadow-lg ${
+                inTune 
+                  ? "border-emerald-400 bg-emerald-500 shadow-[0_0_15px_rgba(52,211,153,0.6)]" 
+                  : "border-zinc-500 bg-zinc-300"
+              }`}>
+                <div className="h-2 w-2 rounded-full bg-zinc-900" />
+              </div>
+            </div>
           </div>
-          <div className="flex justify-between w-full max-w-md text-[10px] font-mono text-muted-foreground mt-1 px-1">
-            <span>-50c</span>
-            <span>-25c</span>
-            <span className="text-primary font-bold">0</span>
-            <span>+25c</span>
-            <span>+50c</span>
+
+          {/* Notes display: Prev (small) - Main Note (Large Center) - Next (small) */}
+          <div className="w-full max-w-xl flex items-center justify-between px-8 mt-6">
+            <div className="w-24 text-left">
+              <span className="text-xl font-bold text-zinc-500 tracking-wider">
+                {formatNoteClean(adjacent.prev)}
+              </span>
+            </div>
+
+            <div className="text-center">
+              {tunerActive && note ? (
+                <div className="font-display text-7xl font-black tracking-tight text-white drop-shadow-md">
+                  {formatNoteClean(note.name)}
+                </div>
+              ) : (
+                <div className="text-sm font-semibold text-zinc-500">
+                  {!tunerActive ? t("tunerDisabled") : t("awaiting")}
+                </div>
+              )}
+            </div>
+
+            <div className="w-24 text-right">
+              <span className="text-xl font-bold text-zinc-500 tracking-wider">
+                {formatNoteClean(adjacent.next)}
+              </span>
+            </div>
+          </div>
+
+        </div>
+
+        {/* Bottom Bar: Cents/Hz switch & Reference Hz */}
+        <div className="flex flex-wrap items-center justify-between gap-4 pt-6 mt-4 border-t border-zinc-800 text-xs">
+          <div className="flex items-center gap-1 bg-zinc-900 p-1 rounded-lg border border-zinc-800">
+            <button
+              onClick={() => setDisplayMode("cents")}
+              className={`px-3 py-1 rounded-md font-semibold transition-all ${
+                displayMode === "cents" ? "bg-zinc-700 text-white shadow" : "text-zinc-400 hover:text-white"
+              }`}
+            >
+              Cents
+            </button>
+            <button
+              onClick={() => setDisplayMode("hz")}
+              className={`px-3 py-1 rounded-md font-semibold transition-all ${
+                displayMode === "hz" ? "bg-zinc-700 text-white shadow" : "text-zinc-400 hover:text-white"
+              }`}
+            >
+              Hz {pitch && `(${pitch.toFixed(1)})`}
+            </button>
+          </div>
+
+          <div className="bg-zinc-900 border border-zinc-800 px-3 py-1.5 rounded-lg font-mono text-zinc-400">
+            440.0 Hz
           </div>
         </div>
+
       </section>
 
-      {/* POSTURE GUIDE SECTION - ORIZZONTALE A PIENA LARGHEZZA */}
+      {/* POSTURE GUIDE SECTION */}
       <section className="rounded-3xl border border-border bg-card p-6 shadow-2xl">
         <h2 className="text-lg font-bold flex items-center gap-2 mb-4">
           <Info className="h-5 w-5 text-primary shrink-0" />
@@ -809,21 +732,21 @@ function TunerPage() {
           {handView === "LEFT" ? (
             <>
               <div className="rounded-2xl border border-border bg-background/40 p-4 flex items-start gap-3">
-                <ChevronRight className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                <span className="font-bold text-primary shrink-0">1.</span>
                 <p className="text-xs text-foreground leading-relaxed">
                   <span className="font-bold text-foreground">{t("leftTip1Title")}: </span>
                   <span className="text-muted-foreground">{t("leftTip1Text")}</span>
                 </p>
               </div>
               <div className="rounded-2xl border border-border bg-background/40 p-4 flex items-start gap-3">
-                <ChevronRight className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                <span className="font-bold text-primary shrink-0">2.</span>
                 <p className="text-xs text-foreground leading-relaxed">
                   <span className="font-bold text-foreground">{t("leftTip2Title")}: </span>
                   <span className="text-muted-foreground">{t("leftTip2Text")}</span>
                 </p>
               </div>
               <div className="rounded-2xl border border-border bg-background/40 p-4 flex items-start gap-3">
-                <ChevronRight className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                <span className="font-bold text-primary shrink-0">3.</span>
                 <p className="text-xs text-foreground leading-relaxed">
                   <span className="font-bold text-foreground">{t("leftTip3Title")}: </span>
                   <span className="text-muted-foreground">{t("leftTip3Text")}</span>
@@ -833,21 +756,21 @@ function TunerPage() {
           ) : (
             <>
               <div className="rounded-2xl border border-border bg-background/40 p-4 flex items-start gap-3">
-                <ChevronRight className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                <span className="font-bold text-primary shrink-0">1.</span>
                 <p className="text-xs text-foreground leading-relaxed">
                   <span className="font-bold text-foreground">{t("rightTip1Title")}: </span>
                   <span className="text-muted-foreground">{t("rightTip1Text")}</span>
                 </p>
               </div>
               <div className="rounded-2xl border border-border bg-background/40 p-4 flex items-start gap-3">
-                <ChevronRight className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                <span className="font-bold text-primary shrink-0">2.</span>
                 <p className="text-xs text-foreground leading-relaxed">
                   <span className="font-bold text-foreground">{t("rightTip2Title")}: </span>
                   <span className="text-muted-foreground">{t("rightTip2Text")}</span>
                 </p>
               </div>
               <div className="rounded-2xl border border-border bg-background/40 p-4 flex items-start gap-3">
-                <ChevronRight className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                <span className="font-bold text-primary shrink-0">3.</span>
                 <p className="text-xs text-foreground leading-relaxed">
                   <span className="font-bold text-foreground">{t("rightTip3Title")}: </span>
                   <span className="text-muted-foreground">{t("rightTip3Text")}</span>
@@ -860,3 +783,5 @@ function TunerPage() {
     </div>
   );
 }
+
+export default TunerPage;
