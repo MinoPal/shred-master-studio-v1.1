@@ -8,6 +8,9 @@ import {
   Info,
   Clock,
   Power,
+  ChevronDown,
+  Save,
+  Trash2,
 } from "lucide-react";
 
 import { useLanguage } from "../context/LanguageContext";
@@ -25,12 +28,18 @@ export const Route = createFileRoute("/tuner")({
 });
 
 type Language = "it" | "es" | "en";
-type PresetKey = "E_STANDARD" | "DROP_D" | "DROP_C" | "CUSTOM";
+type PresetKey = string; // Supporta sia preset fissi che custom salvati
 
 interface GuitarString {
   name: string;
   octave: string;
   freq: number;
+}
+
+interface SavedCustomPreset {
+  id: string;
+  name: string;
+  strings: GuitarString[];
 }
 
 const TRANSLATIONS: Record<Language, Record<string, string>> = {
@@ -52,9 +61,12 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     tunerOn: "ON",
     tunerOff: "OFF",
     custom: "Custom",
+    savePreset: "Save Preset",
+    presetNamePlaceholder: "Preset Name (e.g. My Brutal Drop)...",
+    moreTunings: "More Tunings...",
     awaiting: "Awaiting signal...",
     stringLabel: "String",
-    tunerDisabled: "Tuner Disabled (Turn ON to start)",
+    tunerDisabled: "Tuner Disabled (Click ON to start)",
     pluckString: "Pluck an open string",
     tunerTip: "Tip: Bring your device microphone close to the amplifier or guitar for optimal detection.",
     postureTitle: "Hand Posture Guide",
@@ -89,9 +101,12 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     tunerOn: "ON",
     tunerOff: "OFF",
     custom: "Personalizzato",
+    savePreset: "Salva Preset",
+    presetNamePlaceholder: "Nome accordatura (es. Mio Drop Brutale)...",
+    moreTunings: "Altre accordature...",
     awaiting: "In attesa del segnale...",
     stringLabel: "Corda",
-    tunerDisabled: "Accordatore Disattivato (Attiva ON per iniziare)",
+    tunerDisabled: "Accordatore Disattivato (Clicca ON per iniziare)",
     pluckString: "Suona una corda a vuoto",
     tunerTip: "Suggerimento: avvicina il microfono del dispositivo all'amplificatore o alla chitarra per una ricezione ottimale.",
     postureTitle: "Guida alla Postura delle Mani",
@@ -126,6 +141,9 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     tunerOn: "ON",
     tunerOff: "OFF",
     custom: "Personalizado",
+    savePreset: "Guardar",
+    presetNamePlaceholder: "Nombre de afinación...",
+    moreTunings: "Más afinaciones...",
     awaiting: "Esperando señal...",
     stringLabel: "Cuerda",
     tunerDisabled: "Afinador Desactivado",
@@ -137,17 +155,17 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     leftTip2Title: "Posición del pulgar",
     leftTip2Text: "Mantén el pulgar detrás del mástil, a la altura del dedo corazón, para una palanca óptima.",
     leftTip3Title: "Relaja la muñeca",
-    leftTip3Text: "Mantén la muñeca recta y relajada para evitar tensiones durante pasajes rápidos.",
+    leftTip3Text: "Mantén la muñeca recta y relajada para evitar tensiones durante passaggi rapidos.",
     rightTip1Title: "Punto de apoyo",
     rightTip1Text: "Apoya suavemente el antebrazo sobre el cuerpo de la guitarra, manteniendo la muñeca flexible.",
     rightTip2Title: "Ángulo de la púa",
-    rightTip2Text: "Inclina ligeramente la púa (unos 45°) respecto a las cuerdas para reducir la resistencia y ganar velocidad.",
+    rightTip2Text: "Inclina ligeramente la púa (unos 45°) respecto a le corde per ridurre la resistenza e aumentare la velocità.",
     rightTip3Title: "Movimento mínimo",
     rightTip3Text: "Realiza movimientos pequeños y controlados desde la muñeca en lugar de usar todo el brazo.",
   },
 };
 
-const PRESETS: Record<Exclude<PresetKey, "CUSTOM">, GuitarString[]> = {
+const BASE_PRESETS: Record<string, GuitarString[]> = {
   E_STANDARD: [
     { name: "E", octave: "E2", freq: 82.41 },
     { name: "A", octave: "A2", freq: 110.0 },
@@ -164,12 +182,44 @@ const PRESETS: Record<Exclude<PresetKey, "CUSTOM">, GuitarString[]> = {
     { name: "B", octave: "B3", freq: 246.94 },
     { name: "E", octave: "E4", freq: 329.63 },
   ],
+  D_STANDARD: [
+    { name: "D", octave: "D2", freq: 73.42 },
+    { name: "G", octave: "G2", freq: 98.00 },
+    { name: "C", octave: "C3", freq: 130.81 },
+    { name: "F", octave: "F3", freq: 174.61 },
+    { name: "A", octave: "A3", freq: 220.00 },
+    { name: "D", octave: "D4", freq: 293.66 },
+  ],
+  EB_STANDARD: [
+    { name: "Eb", octave: "Eb2", freq: 77.78 },
+    { name: "Ab", octave: "Ab2", freq: 103.83 },
+    { name: "Db", octave: "Db3", freq: 138.59 },
+    { name: "Gb", octave: "Gb3", freq: 185.00 },
+    { name: "Bb", octave: "Bb3", freq: 233.08 },
+    { name: "Eb", octave: "Eb4", freq: 311.13 },
+  ],
   DROP_C: [
     { name: "C", octave: "C2", freq: 65.41 },
     { name: "G", octave: "G2", freq: 98.0 },
     { name: "C", octave: "C3", freq: 130.81 },
     { name: "F", octave: "F3", freq: 174.61 },
     { name: "A", octave: "A3", freq: 220.0 },
+    { name: "D", octave: "D4", freq: 293.66 },
+  ],
+  C_STANDARD: [
+    { name: "C", octave: "C2", freq: 65.41 },
+    { name: "F", octave: "F2", freq: 87.31 },
+    { name: "Bb", octave: "Bb2", freq: 116.54 },
+    { name: "Eb", octave: "Eb3", freq: 155.56 },
+    { name: "G", octave: "G3", freq: 196.00 },
+    { name: "C", octave: "C4", freq: 261.63 },
+  ],
+  OPEN_G: [
+    { name: "D", octave: "D2", freq: 73.42 },
+    { name: "G", octave: "G2", freq: 98.0 },
+    { name: "D", octave: "D3", freq: 146.83 },
+    { name: "G", octave: "G3", freq: 196.0 },
+    { name: "B", octave: "B3", freq: 246.94 },
     { name: "D", octave: "D4", freq: 293.66 },
   ],
 };
@@ -240,7 +290,7 @@ function autoCorrelate(buf: Float32Array, sampleRate: number): number {
   let rms = 0;
   for (let i = 0; i < SIZE; i++) rms += buf[i] * buf[i];
   rms = Math.sqrt(rms / SIZE);
-  if (rms < 0.01) return -1;
+  if (rms < 0.015) return -1;
 
   let r1 = 0,
     r2 = SIZE - 1,
@@ -297,10 +347,9 @@ function nearestString(freq: number, currentStrings: GuitarString[]) {
   return { string: best, cents };
 }
 
-const SMOOTHING_FACTOR = 0.15;
-
 function TunerPage() {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const smoothedCentsRef = useRef<number>(0);
 
   const { lang, language } = useLanguage() as any;
@@ -319,8 +368,10 @@ function TunerPage() {
   const [started, setStarted] = useState(false);
   const [isAudioReady, setIsAudioReady] = useState(false);
 
-  const [tunerActive, setTunerActive] = useState(true);
+  const [tunerActive, setTunerActive] = useState(false);
   const [showPrompt, setShowPrompt] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
 
   const [pitch, setPitch] = useState<number | null>(null);
   const [note, setNote] = useState<{ name: string; octave: string; cents: number } | null>({
@@ -330,9 +381,13 @@ function TunerPage() {
   });
 
   const [preset, setPreset] = useState<PresetKey>("E_STANDARD");
-  const [customStrings, setCustomStrings] = useState<GuitarString[]>([...PRESETS.E_STANDARD]);
-  const [displayMode, setDisplayMode] = useState<"cents" | "hz">("cents");
+  const [customStrings, setCustomStrings] = useState<GuitarString[]>([...BASE_PRESETS.E_STANDARD]);
+  
+  // STATO PER I PRESET UTENTE SALVATI IN LOCALSTORAGE
+  const [savedPresets, setSavedPresets] = useState<SavedCustomPreset[]>([]);
+  const [newPresetName, setNewPresetName] = useState("");
 
+  const [displayMode, setDisplayMode] = useState<"cents" | "hz">("cents");
   const [handView, setHandView] = useState<"LEFT" | "RIGHT">("LEFT");
 
   const rafRef = useRef<number | null>(null);
@@ -340,13 +395,54 @@ function TunerPage() {
   const ctxRef = useRef<AudioContext | null>(null);
   const bufRef = useRef<Float32Array | null>(null);
 
-  const activeStrings = preset === "CUSTOM" ? customStrings : PRESETS[preset];
+  // Carica i preset salvati al primo avvio
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("shred_custom_tunings");
+      if (stored) {
+        setSavedPresets(JSON.parse(stored));
+      }
+    } catch {}
+  }, []);
 
-  const handleSelectPreset = (newPreset: PresetKey) => {
+  // Mappa completa di tutti i preset disponibili (base + custom salvati)
+  const getAllPresets = (): Record<string, GuitarString[]> => {
+    const all = { ...BASE_PRESETS };
+    savedPresets.forEach((p) => {
+      all[p.id] = p.strings;
+    });
+    return all;
+  };
+
+  const activeStrings = preset === "CUSTOM" ? customStrings : (getAllPresets()[preset] || BASE_PRESETS.E_STANDARD);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const triggerSilentReset = (newPreset: PresetKey) => {
     setPreset(newPreset);
-    const firstStr = PRESETS[newPreset]?.[0];
+    setIsDropdownOpen(false);
+    const stringsMap = getAllPresets();
+    const firstStr = stringsMap[newPreset]?.[0];
     if (firstStr) {
       setNote({ name: firstStr.name, octave: firstStr.octave, cents: 0 });
+      smoothedCentsRef.current = 0;
+    }
+
+    if (started && tunerActive) {
+      setIsResetting(true);
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      setPitch(null);
+      setTimeout(() => {
+        setIsResetting(false);
+      }, 300);
     }
   };
 
@@ -358,6 +454,49 @@ function TunerPage() {
     setCustomStrings(updated);
     if (index === 0) {
       setNote({ name: found.name, octave: found.octave, cents: 0 });
+      smoothedCentsRef.current = 0;
+    }
+
+    if (started && tunerActive) {
+      setIsResetting(true);
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      setPitch(null);
+      setTimeout(() => {
+        setIsResetting(false);
+      }, 300);
+    }
+  };
+
+  // Funzione per salvare il Custom Tuning attuale
+  const handleSaveCustomPreset = () => {
+    if (!newPresetName.trim()) return;
+    const newId = `CUSTOM_${Date.now()}`;
+    const newPreset: SavedCustomPreset = {
+      id: newId,
+      name: newPresetName.trim(),
+      strings: [...customStrings],
+    };
+
+    const updatedList = [...savedPresets, newPreset];
+    setSavedPresets(updatedList);
+    try {
+      localStorage.setItem("shred_custom_tunings", JSON.stringify(updatedList));
+    } catch {}
+
+    setNewPresetName("");
+    setPreset(newId);
+  };
+
+  // Funzione per eliminare un preset salvato
+  const handleDeleteCustomPreset = (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    const updatedList = savedPresets.filter((p) => p.id !== id);
+    setSavedPresets(updatedList);
+    try {
+      localStorage.setItem("shred_custom_tunings", JSON.stringify(updatedList));
+    } catch {}
+    if (preset === id) {
+      setPreset("E_STANDARD");
     }
   };
 
@@ -403,34 +542,44 @@ function TunerPage() {
   };
 
   useEffect(() => {
-    if (!tunerActive) {
+    if (!tunerActive || isResetting) {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
-      setPitch(null);
-      setNote(null);
+      if (!tunerActive) {
+        setPitch(null);
+        setNote(null);
+      }
       smoothedCentsRef.current = 0;
     } else if (started && isAudioReady && analyserRef.current) {
       loop();
     }
-  }, [tunerActive, started, isAudioReady, preset, customStrings]);
+  }, [tunerActive, isResetting, started, isAudioReady, preset, customStrings]);
 
   function loop() {
-    if (!tunerActive) return;
+    if (!tunerActive || isResetting) return;
     const analyser = analyserRef.current,
       ctx = ctxRef.current,
       buf = bufRef.current;
     if (!analyser || !ctx || !buf) return;
     analyser.getFloatTimeDomainData(buf as Float32Array<ArrayBuffer>);
     const f = autoCorrelate(buf, ctx.sampleRate);
+    
     if (f > 15 && f < 4000) {
       const { string, cents: rawCents } = nearestString(f, activeStrings);
       
       const prev = smoothedCentsRef.current;
-      const smoothed = prev + (rawCents - prev) * SMOOTHING_FACTOR;
-      const finalCents = Math.abs(smoothed) < 1.5 ? 0 : smoothed;
-      smoothedCentsRef.current = finalCents;
+      const jumpDiff = Math.abs(rawCents - prev);
+      const smoothingFactor = jumpDiff > 25 ? 0.05 : 0.2;
+
+      let smoothed = prev + (rawCents - prev) * smoothingFactor;
+
+      if (Math.abs(smoothed) < 2.0) {
+        smoothed = 0;
+      }
+
+      smoothedCentsRef.current = smoothed;
 
       setPitch(f);
-      setNote({ name: string.name, octave: string.octave, cents: finalCents });
+      setNote({ name: string.name, octave: string.octave, cents: smoothed });
     }
     rafRef.current = requestAnimationFrame(loop);
   }
@@ -451,6 +600,18 @@ function TunerPage() {
 
   const formatNoteClean = (n: string) => n.replace("b", "♭").replace("#", "♯");
   const adjacent = note ? getAdjacentNotes(note.name) : { prev: "C#", next: "D#" };
+
+  const isDropdownPreset = ["EB_STANDARD", "C_STANDARD", "OPEN_G"].includes(preset) || savedPresets.some(p => p.id === preset);
+
+  // Trova il nome da mostrare nel menu a tendina se è attivo un preset salvato
+  const getDropdownLabel = () => {
+    if (["EB_STANDARD", "C_STANDARD", "OPEN_G"].includes(preset)) {
+      return preset.replace("_", " ");
+    }
+    const foundCustom = savedPresets.find(p => p.id === preset);
+    if (foundCustom) return foundCustom.name;
+    return t("moreTunings");
+  };
 
   return (
     <div className="flex flex-col gap-6 px-5 pt-8 pb-12 max-w-4xl mx-auto">
@@ -554,10 +715,11 @@ function TunerPage() {
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-xs font-bold uppercase tracking-wider text-zinc-400 mr-2">Tuner</span>
 
-            {(["E_STANDARD", "DROP_D", "DROP_C"] as const).map((k) => (
+            {/* Pulsanti rapidi principali */}
+            {(["E_STANDARD", "DROP_D", "D_STANDARD", "DROP_C"] as const).map((k) => (
               <button
                 key={k}
-                onClick={() => handleSelectPreset(k)}
+                onClick={() => triggerSilentReset(k)}
                 className={`rounded-lg px-3 py-1 text-xs font-semibold transition-all ${
                   preset === k
                     ? "bg-zinc-700 text-white shadow"
@@ -568,12 +730,90 @@ function TunerPage() {
               </button>
             ))}
 
+            {/* MENU A TENDINA PER ACCORDATURE ALTERNATIVE EXTRA + CUSTOM SALVATI */}
+            <div className="relative" ref={dropdownRef}>
+              <button
+                onClick={() => setIsDropdownOpen((prev) => !prev)}
+                className={`flex items-center gap-1.5 rounded-lg px-3 py-1 text-xs font-semibold transition-all ${
+                  isDropdownPreset
+                    ? "bg-zinc-700 text-white shadow"
+                    : "bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800"
+                }`}
+              >
+                <span>{getDropdownLabel()}</span>
+                <ChevronDown className={`h-3 w-3 transition-transform ${isDropdownOpen ? "rotate-180" : ""}`} />
+              </button>
+
+              {isDropdownOpen && (
+                <div className="absolute left-0 top-full mt-1.5 z-50 w-52 rounded-xl border border-zinc-700 bg-zinc-900 p-1.5 shadow-2xl backdrop-blur-xl flex flex-col gap-1">
+                  <button
+                    onClick={() => triggerSilentReset("EB_STANDARD")}
+                    className={`w-full text-left rounded-lg px-3 py-2 text-xs font-semibold transition-all ${
+                      preset === "EB_STANDARD" ? "bg-zinc-700 text-white" : "text-zinc-400 hover:bg-zinc-800 hover:text-white"
+                    }`}
+                  >
+                    Eb Standard
+                  </button>
+                  <button
+                    onClick={() => triggerSilentReset("C_STANDARD")}
+                    className={`w-full text-left rounded-lg px-3 py-2 text-xs font-semibold transition-all ${
+                      preset === "C_STANDARD" ? "bg-zinc-700 text-white" : "text-zinc-400 hover:bg-zinc-800 hover:text-white"
+                    }`}
+                  >
+                    C Standard
+                  </button>
+                  <button
+                    onClick={() => triggerSilentReset("OPEN_G")}
+                    className={`w-full text-left rounded-lg px-3 py-2 text-xs font-semibold transition-all ${
+                      preset === "OPEN_G" ? "bg-zinc-700 text-white" : "text-zinc-400 hover:bg-zinc-800 hover:text-white"
+                    }`}
+                  >
+                    Open G
+                  </button>
+
+                  {/* Mostra eventuali preset personalizzati salvati dall'utente */}
+                  {savedPresets.length > 0 && (
+                    <div className="border-t border-zinc-800 my-1 pt-1">
+                      <span className="px-3 text-[10px] font-bold uppercase text-zinc-500">Custom Salvati</span>
+                      {savedPresets.map((p) => (
+                        <div key={p.id} className="flex items-center justify-between group">
+                          <button
+                            onClick={() => triggerSilentReset(p.id)}
+                            className={`w-full text-left rounded-lg px-3 py-1.5 text-xs font-semibold transition-all truncate ${
+                              preset === p.id ? "bg-zinc-700 text-white" : "text-zinc-400 hover:bg-zinc-800 hover:text-white"
+                            }`}
+                          >
+                            {p.name}
+                          </button>
+                          <button
+                            onClick={(e) => handleDeleteCustomPreset(e, p.id)}
+                            className="p-1.5 text-zinc-500 hover:text-red-400 transition-colors"
+                            title="Elimina"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Custom Tuning Button */}
             <button
               onClick={() => {
                 setPreset("CUSTOM");
+                setIsDropdownOpen(false);
                 const firstCustom = customStrings[0];
                 if (firstCustom) {
                   setNote({ name: firstCustom.name, octave: firstCustom.octave, cents: 0 });
+                }
+                if (started && tunerActive) {
+                  setIsResetting(true);
+                  if (rafRef.current) cancelAnimationFrame(rafRef.current);
+                  setPitch(null);
+                  setTimeout(() => setIsResetting(false), 300);
                 }
               }}
               className={`rounded-lg px-3 py-1 text-xs font-semibold transition-all ${
@@ -594,7 +834,7 @@ function TunerPage() {
               className={`flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-bold transition-all ${
                 tunerActive
                   ? "bg-emerald-600 text-white shadow-[0_0_10px_rgba(52,211,153,0.4)]"
-                  : "bg-zinc-800 text-zinc-400 border border-zinc-700 hover:text-white"
+                  : "bg-red-600 text-white shadow-[0_0_12px_rgba(239,68,68,0.7)] hover:bg-red-700 animate-pulse"
               }`}
             >
               <Power className="h-3.5 w-3.5" />
@@ -603,25 +843,46 @@ function TunerPage() {
           </div>
         </div>
 
-        {/* CUSTOM TUNING SELECTORS */}
+        {/* CUSTOM TUNING SELECTORS & SAVE PRESET BAR */}
         {preset === "CUSTOM" && (
-          <div className="mb-6 grid grid-cols-6 gap-2 rounded-xl bg-zinc-900/80 p-3 border border-zinc-800">
-            {customStrings.map((str, idx) => (
-              <div key={idx} className="flex flex-col items-center gap-1">
-                <span className="text-[10px] font-bold text-zinc-500 uppercase">{t("stringLabel")} {6 - idx}</span>
-                <select
-                  value={str.octave}
-                  onChange={(e) => handleCustomNoteChange(idx, e.target.value)}
-                  className="w-full rounded-md border border-zinc-700 bg-zinc-800 text-center text-xs font-bold py-1 text-zinc-200 focus:border-emerald-500 focus:outline-none"
-                >
-                  {CUSTOM_NOTE_OPTIONS.map((opt) => (
-                    <option key={opt.octave} value={opt.octave}>
-                      {opt.octave} ({opt.freq.toFixed(0)}Hz)
-                    </option>
-                  ))}
-                </select>
-              </div>
-            ))}
+          <div className="mb-6 flex flex-col gap-3 rounded-xl bg-zinc-900/80 p-3 border border-zinc-800">
+            <div className="grid grid-cols-6 gap-2">
+              {customStrings.map((str, idx) => (
+                <div key={idx} className="flex flex-col items-center gap-1">
+                  <span className="text-[10px] font-bold text-zinc-500 uppercase">{t("stringLabel")} {6 - idx}</span>
+                  <select
+                    value={str.octave}
+                    onChange={(e) => handleCustomNoteChange(idx, e.target.value)}
+                    className="w-full rounded-md border border-zinc-700 bg-zinc-800 text-center text-xs font-bold py-1 text-zinc-200 focus:border-emerald-500 focus:outline-none"
+                  >
+                    {CUSTOM_NOTE_OPTIONS.map((opt) => (
+                      <option key={opt.octave} value={opt.octave}>
+                        {opt.octave} ({opt.freq.toFixed(0)}Hz)
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              ))}
+            </div>
+
+            {/* Barra di salvataggio personalizzata */}
+            <div className="flex items-center gap-2 pt-2 border-t border-zinc-800">
+              <input
+                type="text"
+                placeholder={t("presetNamePlaceholder")}
+                value={newPresetName}
+                onChange={(e) => setNewPresetName(e.target.value)}
+                className="flex-1 rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-1.5 text-xs text-zinc-200 focus:border-emerald-500 focus:outline-none"
+              />
+              <button
+                onClick={handleSaveCustomPreset}
+                disabled={!newPresetName.trim()}
+                className="flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3.5 py-1.5 text-xs font-bold text-white shadow hover:bg-emerald-500 disabled:opacity-40 disabled:pointer-events-none transition-all"
+              >
+                <Save className="h-3.5 w-3.5" />
+                {t("savePreset")}
+              </button>
+            </div>
           </div>
         )}
 
@@ -634,7 +895,7 @@ function TunerPage() {
         {/* MAIN VISUAL TUNER SCREEN */}
         <div className="flex flex-col items-center py-2">
           
-          {/* Top Indicators & Ingrandimento Freccette Direzionali (3x) */}
+          {/* Top Indicators & Directional Arrows */}
           <div className="w-full max-w-xl flex justify-between items-center px-4 mb-3 text-xs font-mono text-zinc-500">
             <span>-50</span>
             <span className={`font-bold transition-colors select-none ${cents < -2 ? "text-emerald-400 font-black text-2xl" : "text-zinc-600 text-xl"}`}>&gt;</span>
