@@ -35,7 +35,7 @@ type Riff = {
 const RIFFS: Riff[] = [
   {
     id: "acdc-style-workout",
-    title: "AC/DC Bends & Chords Style",
+    title: "80s HARD ROCK: BENDS & CHORDS",
     key: "E minor — E5 / D5 / G5",
     tempo: 128,
     tag: "Open Chords · Bends & Pull-offs",
@@ -52,7 +52,7 @@ const RIFFS: Riff[] = [
   },
   {
     id: "metallica-downpicking",
-    title: "Metallica Downpicking Style",
+    title: "THRASH METAL: DOWNPICKING RIFFS",
     key: "E minor — Palm Mute E5",
     tempo: 180,
     tag: "Downpicking · Fast Speed",
@@ -67,7 +67,7 @@ const RIFFS: Riff[] = [
   },
   {
     id: "guns-n-roses-alternate-picking-string-skipping",
-    title: "GUNS N' ROSES Alternate Picking & String Skipping Style",
+    title: "80s ROCK & BLUES: ALTERNATE & SKIPPING",
     key: "G minor — Alternate Picking G3",
     tempo: 120,
     tag: "Alternate Picking · String Skipping",
