@@ -201,3 +201,17 @@
   fill: #d10f0f;
   stroke: #d10f0f;
 }
+
+/* 
+ * REGOLA GLOBALE PER LA SCOMPARSA DEL MENU FLUTTUANTE 
+ * Si attiva automaticamente quando aggiungiamo la classe "hide-navigation" al body.
+ */
+body.hide-navigation nav,
+body.hide-navigation [role="navigation"],
+body.hide-navigation .floating-menu,
+body.hide-navigation footer {
+  display: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+}

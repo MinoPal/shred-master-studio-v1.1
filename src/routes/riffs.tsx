@@ -72,12 +72,12 @@ const RIFFS: Riff[] = [
     tempo: 120,
     tag: "Alternate Picking · String Skipping",
     gpFile: "/track/guns-n-roses-alternate-picking-and-string-skipping-workout.gp",
-    src: "/track/guns-n-roses-alternate-picking-and-string-skipping-guitar.wav",
+    src: "/track/guns-n-roses-alternate-picking-string-skipping-guitar.wav",
     tab: [],
     stems: [
-      { id: "guitar", name: "Guitar", url: "/track/guns-n-roses-alternate-picking-and-string-skipping-guitar.wav" },
-      { id: "bass", name: "Bass", url: "/track/guns-n-roses-alternate-picking-and-string-skipping-bass.wav" },
-      { id: "drums", name: "Drums", url: "/track/guns-n-roses-alternate-picking-and-string-skipping-drums.wav" },
+      { id: "guitar", name: "Guitar", url: "/track/guns-n-roses-alternate-picking-string-skipping-guitar.wav" },
+      { id: "bass", name: "Bass", url: "/track/guns-n-roses-alternate-picking-string-skipping-bass.wav" },
+      { id: "drums", name: "Drums", url: "/track/guns-n-roses-alternate-picking-string-skipping-drums.wav" },
     ],
   },
 ];
@@ -170,7 +170,7 @@ const translations = {
     proModal: {
       badge: "PRO",
       title: "Consigue un 50% de Descuento en Studio Pro",
-      desc: "¡Estamos preparando la versión Pro! Deja tu correo para acceso prioritario y un 50% de descuento en el lanzamiento.",
+      desc: "¡Estamos preparando la versión Pro! Deja tu correo para acceso prioritario y un 50% de descuento en il lancio.",
       submitBtn: "Obtener Descuento",
       placeholder: "Introduce tu correo...",
       closeBtn: "Cerrar",
@@ -188,7 +188,6 @@ function useMp3Player() {
   const speedRef = useRef<number>(1);
   const playbackGenerationRef = useRef(0);
 
-  // Mixer separati per singolo riffId
   const stemMixesRef = useRef<Record<string, {
     vol: Record<string, number>;
     mute: Record<string, boolean>;
@@ -471,7 +470,6 @@ function RiffsPage() {
     }));
   };
 
-  // STATI DEL MIXER INDICIZZATI PER Riff ID
   const [riffStemVols, setRiffStemVols] = useState<Record<string, Record<string, number>>>({});
   const [riffStemMutes, setRiffStemMutes] = useState<Record<string, Record<string, boolean>>>({});
   const [riffStemSolos, setRiffStemSolos] = useState<Record<string, Record<string, boolean>>>({});
@@ -558,21 +556,6 @@ function RiffsPage() {
     );
   };
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      window.dispatchEvent(
-        new CustomEvent("shred:playback-change", { detail: { playing: playingId !== null } })
-      );
-    }
-    return () => {
-      if (typeof window !== "undefined") {
-        window.dispatchEvent(
-          new CustomEvent("shred:playback-change", { detail: { playing: false } })
-        );
-      }
-    };
-  }, [playingId]);
-
   useEffect(() => () => cancelCountIn(), []);
 
   const toggleRiff = (riff: Riff, active: boolean) => {
@@ -612,6 +595,22 @@ function RiffsPage() {
 
     void startWithCountIn(riff, syncScore, onEnd);
   };
+
+  // Condizione di riproduzione attiva (audio o count-in)
+  const isAnyPlaying = playingId !== null || countIn !== null;
+
+  // Sincronizzazione con la classe globale di stile.css per far sparire la navbar senza cozzare
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    if (isAnyPlaying) {
+      document.body.classList.add("hide-navigation");
+    } else {
+      document.body.classList.remove("hide-navigation");
+    }
+    return () => {
+      document.body.classList.remove("hide-navigation");
+    };
+  }, [isAnyPlaying]);
 
   return (
     <div className="flex flex-col gap-5 px-5 pt-8 pb-12 max-w-4xl mx-auto">
@@ -831,7 +830,7 @@ function RiffsPage() {
                   </div>
                 )}
 
-                {/* SPARTITO GUITAR TAB CLIENT-ONLY */}
+                {/* SPARTITO GUITAR TAB CLIENT-ONLY (STRUTTURA ORIGINALE 1.0) */}
                 <ClientOnly fallback={<div className="h-[520px] border-t border-border bg-background/70" />}>
                   <Suspense fallback={<div className="h-[520px] border-t border-border bg-background/70" />}>
                     <GuitarProPlayer 

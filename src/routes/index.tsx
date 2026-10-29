@@ -11,7 +11,6 @@ export const Route = createFileRoute("/")({
       { property: "og:title", content: "Allenamento — SHRED" },
       { property: "og:description", content: "Metronomo progressivo per chitarristi rock e metal." },
     ],
-    // Manifesto Json
     links: [
       { rel: "manifest", href: "/manifest.json" },
     ],
@@ -93,7 +92,6 @@ const translations: Record<Language, Record<string, string>> = {
   },
 };
 
-// Il tuo link diretto al modulo Google Forms
 const GOOGLE_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSffNjH4YDBe5l5g1WpsVDGCTD0MyYoPzQYuNeLhFhMilGL3SA/viewform?usp=publish-editor";
 
 function TrainingPage() {
@@ -102,7 +100,6 @@ function TrainingPage() {
   const currentLang: Language = rawLang.includes("it") ? "it" : rawLang.includes("es") ? "es" : "en";
   const t = translations[currentLang] || translations.en;
 
-  // Registrazione del Service Worker per PWA
   useEffect(() => {
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker
@@ -120,7 +117,7 @@ function TrainingPage() {
   const [startBpm, setStartBpm] = useState(90);
   const [playing, setPlaying] = useState(false);
   const [speedMode, setSpeedMode] = useState(false);
-  const [beat, setBeat] = useState(0); // 0..3
+  const [beat, setBeat] = useState(0); 
   const [measure, setMeasure] = useState(0);
   const [history, setHistory] = useState<number[]>([]);
 
@@ -232,6 +229,17 @@ function TrainingPage() {
 
   return (
     <div className="flex flex-col gap-6 px-5 pt-8 pb-12 max-w-4xl mx-auto">
+      {/* Trucchetto CSS: Nasconde la barra di navigazione fluttuante quando il metronomo è attivo */}
+      {playing && (
+        <style>{`
+          nav, [role="navigation"], .floating-menu, footer {
+            display: none !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+          }
+        `}</style>
+      )}
+
       <header>
         <p className="text-xs font-bold uppercase tracking-[0.3em] text-primary">{t.badge}</p>
         <h1 className="mt-1 text-4xl font-black">

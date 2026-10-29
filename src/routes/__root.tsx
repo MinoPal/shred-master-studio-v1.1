@@ -7,13 +7,14 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { Flame, Music2, Mic } from "lucide-react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { LanguageProvider } from "../context/LanguageContext";
 import { LanguageSelector } from "../components/LanguageSelector";
+import { NamBar } from "../components/NamBar";
 
 function NotFoundComponent() {
   return (
@@ -128,12 +129,15 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <LanguageProvider>
-        <div className="mx-auto flex min-h-screen w-full max-w-md flex-col pb-24">
-          {/* Header con il cambio lingua */}
-          <header className="flex items-center justify-between px-4 py-2 border-b border-border/30">
+        <div className="mx-auto flex min-h-screen w-full max-w-md flex-col pb-24 px-4 pt-2">
+          {/* Header superiore */}
+          <header className="flex items-center justify-between py-2 border-b border-border/30 mb-4">
             <span className="font-bold text-xs tracking-wider text-muted-foreground uppercase">Shred Studio</span>
             <LanguageSelector />
           </header>
+
+          {/* Barra del DSP Neurale (SHRED NAM STUDIO) persistente su tutte le pagine */}
+          <NamBar />
 
           <Outlet />
         </div>
@@ -144,17 +148,6 @@ function RootComponent() {
 }
 
 function BottomNav() {
-  const [hiddenDuringPlayback, setHiddenDuringPlayback] = useState(false);
-
-  useEffect(() => {
-    const handlePlayback = (event: Event) => {
-      const playbackEvent = event as CustomEvent<{ playing?: boolean }>;
-      setHiddenDuringPlayback(Boolean(playbackEvent.detail?.playing));
-    };
-    window.addEventListener("shred:playback-change", handlePlayback);
-    return () => window.removeEventListener("shred:playback-change", handlePlayback);
-  }, []);
-
   const items = [
     { to: "/", label: "Training", icon: Flame },
     { to: "/riffs", label: "Riffs", icon: Music2 },
@@ -163,8 +156,7 @@ function BottomNav() {
 
   return (
     <nav
-      aria-hidden={hiddenDuringPlayback}
-      className={`fixed bottom-4 left-1/2 z-50 -translate-x-1/2 rounded-full border border-border/70 bg-background/90 shadow-ember backdrop-blur-xl transition-all duration-300 ${hiddenDuringPlayback ? "pointer-events-none translate-y-8 opacity-0" : "opacity-100"}`}
+      className="fixed bottom-4 left-1/2 z-50 -translate-x-1/2 rounded-full border border-border/70 bg-background/90 shadow-ember backdrop-blur-xl transition-all duration-300"
       style={{ marginBottom: "env(safe-area-inset-bottom)" }}
     >
       <div className="flex items-stretch gap-1 px-2 py-1.5">
