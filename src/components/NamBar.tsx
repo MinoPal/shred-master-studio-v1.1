@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
 import { Sliders, Zap, CheckCircle2, AlertCircle, HardDrive, ChevronDown, ChevronUp, ChevronLeft, ChevronRight } from 'lucide-react';
-import { NamEngine } from 'neural-amp-modeler-wasm/engine';
 import { useLanguage } from '../context/LanguageContext';
 
 const realModels = [
@@ -145,6 +144,11 @@ export function NamBar() {
 
       const sourceNode = ctx.createMediaStreamSource(stream);
       sourceNodeRef.current = sourceNode;
+
+      // CARICAMENTO DINAMICO A RUNTIME (Bypass totale dell'analisi statica di Rolldown)
+      const modulePath = 'neural-amp-modeler-wasm/engine';
+      const namModule = await import(/* @vite-ignore */ modulePath);
+      const NamEngine = namModule.NamEngine || namModule.default;
 
       const engine = await NamEngine.attach(ctx);
       engineRef.current = engine;
