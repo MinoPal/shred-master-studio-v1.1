@@ -1,7 +1,20 @@
-import { useState, useRef, useEffect } from 'react';
-import { Sliders, Zap, CheckCircle2, AlertCircle, HardDrive, ChevronDown, ChevronUp, ChevronLeft, ChevronRight } from 'lucide-react';
-import { useLanguage } from '../context/LanguageContext';
+import React, { useState, useRef, useEffect, createContext, useContext } from 'react';
+import { Sliders, Zap, CheckCircle2, AlertCircle, HardDrive, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Globe } from 'lucide-react';
 
+// ==========================================
+// 1. MOCK DEL LANGUAGE CONTEXT (uguale a Shred Master)
+// ==========================================
+type Language = 'it' | 'en' | 'es';
+const LanguageContext = createContext<{ language: Language; setLanguage: (lang: Language) => void }>({
+  language: 'it',
+  setLanguage: () => {},
+});
+
+const useLanguage = () => useContext(LanguageContext);
+
+// ==========================================
+// 2. LISTA MODELLI E TRADUZIONI (da NamBar.tsx originale)
+// ==========================================
 const realModels = [
   { name: "800 Clean", file: "800 clean.nam" },
   { name: "HiWatt Full Rig", file: "HiWatt_full_rig_2.nam" },
@@ -27,7 +40,6 @@ const realModels = [
   { name: "Vox AC15CH Overdriven TB", file: "Vox AC15CH Overdriven TB.nam" },
 ];
 
-// Dizionario delle traduzioni per la NamBar
 const translations = {
   it: {
     standby: "In Standby",
@@ -70,6 +82,9 @@ const translations = {
   },
 };
 
+// ==========================================
+// 3. COMPONENTE NAMBAR (Identico al tuo)
+// ==========================================
 export function NamBar() {
   const { language } = useLanguage() as { language: 'it' | 'en' | 'es' };
   const t = translations[language] || translations.en;
@@ -79,8 +94,7 @@ export function NamBar() {
   const [selectedDeviceId, setSelectedDeviceId] = useState<string>('');
   const [selectedModelIndex, setSelectedModelIndex] = useState<number>(0);
   const [activeDeviceLabel, setActiveDeviceLabel] = useState<string>('');
-  
-  const [isPanelOpen, setIsPanelOpen] = useState<boolean>(false);
+  const [isPanelOpen, setIsPanelOpen] = useState<boolean>(true);
 
   const audioCtxRef = useRef<AudioContext | null>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
@@ -119,15 +133,11 @@ export function NamBar() {
 
   async function connectAudioLine() {
     try {
-      // OTTIMIZZAZIONE LATENZA: AudioContext impostato con priorità interattiva
       const AudioCtxClass = window.AudioContext || (window as any).webkitAudioContext;
-      const ctx = new AudioCtxClass({
-        latencyHint: 'interactive',
-      });
+      const ctx = new AudioCtxClass({ latencyHint: 'interactive' });
       if (ctx.state === "suspended") await ctx.resume();
       audioCtxRef.current = ctx;
 
-      // OTTIMIZZAZIONE LATENZA: Stream microfonico pulito da filtri e ritardi software
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
           deviceId: selectedDeviceId ? { exact: selectedDeviceId } : undefined,
@@ -145,9 +155,7 @@ export function NamBar() {
       const sourceNode = ctx.createMediaStreamSource(stream);
       sourceNodeRef.current = sourceNode;
 
-      // CARICAMENTO DINAMICO A RUNTIME (Bypass totale dell'analisi statica di Rolldown)
-      const modulePath = 'neural-amp-modeler-wasm/engine';
-      const namModule = await import(/* @vite-ignore */ modulePath);
+      const namModule = await import('neural-amp-modeler-wasm/engine');
       const NamEngine = namModule.NamEngine || namModule.default;
 
       const engine = await NamEngine.attach(ctx);
@@ -292,7 +300,7 @@ export function NamBar() {
               </select>
             </div>
 
-            {/* Selezione Profilo .nam con Freccette affiancate */}
+            {/* Selezione Profilo .nam con Freccette */}
             <div>
               <label className="block text-[11px] font-bold uppercase tracking-wider text-neutral-400 mb-1.5 flex items-center gap-1.5">
                 <Sliders className="h-3.5 w-3.5 text-amber-500" /> {t.ampProfile}
@@ -357,5 +365,43 @@ export function NamBar() {
 
       </div>
     </div>
+  );
+}
+
+// ==========================================
+// 4. APP PRINCIPALE DELLA SANDBOX (con LanguageSelector integrato)
+// ==========================================
+export default function App() {
+  const [language, setLanguage] = useState<Language>('it');
+
+  return (
+    <LanguageContext.Provider value={{ language, setLanguage }}>
+      <div className="min-h-screen bg-neutral-950 p-6 flex flex-col items-center justify-center">
+        
+        {/* Selettore Lingua con le bandierine (simile al tuo LanguageSelector.tsx) */}
+        <div className="w-full max-w-xl flex justify-end mb-4">
+          <div className="flex items-center gap-1">
+            <div className="flex items-center gap-2 bg-neutral-900 border border-neutral-800 px-3 py-1.5 rounded-lg shadow-md">
+              <Globe className="h-3.5 w-3.5 text-amber-500" />
+              <select
+                value={language}
+                onChange={(e) => setLanguage(e.target.value as Language)}
+                className="bg-neutral-950 text-white text-xs font-semibold px-2 py-1 rounded-md border border-neutral-700 focus:outline-none focus:border-amber-500 cursor-pointer"
+              >
+                <option value="it">🇮🇹 IT</option>
+                <option value="en">🇬🇧 EN</option>
+                <option value="es">🇪🇸 ES</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* Qui viene montata la NamBar esatta che sposterai su Shred Master */}
+        <div className="w-full max-w-xl">
+          <NamBar />
+        </div>
+
+      </div>
+    </LanguageContext.Provider>
   );
 }
