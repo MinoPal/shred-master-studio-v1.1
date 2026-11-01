@@ -32,7 +32,7 @@ const translations = {
   it: {
     standby: "In Standby",
     active: "Attivo",
-    clickToOpen: "👆 CLICCA QUI PER APRIRE I CONTROLLI DSP",
+    clickToOpen: "👆 CLICCA QUI PER APRIRE I CONTROLLI NAM",
     device: "Periferica",
     detecting: "Rilevamento periferiche in corso...",
     noDevice: "Nessuna periferica audio rilevata",
@@ -45,7 +45,7 @@ const translations = {
   en: {
     standby: "Standby",
     active: "Active",
-    clickToOpen: "👆 CLICK HERE TO OPEN DSP CONTROLS",
+    clickToOpen: "👆 CLICK HERE TO OPEN NAM CONTROLS",
     device: "Device",
     detecting: "Detecting audio devices...",
     noDevice: "No audio device detected",
@@ -58,7 +58,7 @@ const translations = {
   es: {
     standby: "En Espera",
     active: "Activo",
-    clickToOpen: "👆 HAZ CLIC AQUÍ PARA ABRIR CONTROLES DSP",
+    clickToOpen: "👆 HAZ CLIC AQUÍ PARA ABRIR CONTROLES NAM",
     device: "Dispositivo",
     detecting: "Detectando dispositivos de audio...",
     noDevice: "No se detectó ningún dispositivo de audio",
