@@ -1,0 +1,1419 @@
+/* Tailwind CSS - Optimized for component library */
+/* Only includes styles used in components */
+/* ! tailwindcss v3.4.1 | MIT License | https://tailwindcss.com */
+/*
+1. Prevent padding and border from affecting element width. (https://github.com/mozdevs/cssremedy/issues/4)
+2. Allow adding a border to an element by just adding a border-width. (https://github.com/tailwindcss/tailwindcss/pull/116)
+*/
+*,
+::before,
+::after {
+  box-sizing: border-box; /* 1 */
+  border-width: 0; /* 2 */
+  border-style: solid; /* 2 */
+  border-color: #e5e7eb; /* 2 */
+}
+.neural-amp-modeler ::before, .neural-amp-modeler ::after {
+  --tw-content: '';
+}
+/*
+1. Use a consistent sensible line-height in all browsers.
+2. Prevent adjustments of font size after orientation changes in iOS.
+3. Use a more readable tab size.
+4. Use the user's configured `sans` font-family by default.
+5. Use the user's configured `sans` font-feature-settings by default.
+6. Use the user's configured `sans` font-variation-settings by default.
+7. Disable tap highlights on iOS
+*/
+.neural-amp-modeler html, .neural-amp-modeler :host {
+  line-height: 1.5; /* 1 */
+  -webkit-text-size-adjust: 100%; /* 2 */
+  -moz-tab-size: 4; /* 3 */
+  -o-tab-size: 4;
+     tab-size: 4; /* 3 */
+  font-family: var(--t3k-font); /* 4 */
+  font-feature-settings: normal; /* 5 */
+  font-variation-settings: normal; /* 6 */
+  -webkit-tap-highlight-color: transparent; /* 7 */
+}
+/*
+1. Remove the margin in all browsers.
+2. Inherit line-height from `html` so users can set them as a class directly on the `html` element.
+*/
+body {
+  margin: 0; /* 1 */
+  line-height: inherit; /* 2 */
+}
+/*
+1. Add the correct height in Firefox.
+2. Correct the inheritance of border color in Firefox. (https://bugzilla.mozilla.org/show_bug.cgi?id=190655)
+3. Ensure horizontal rules are visible by default.
+*/
+.neural-amp-modeler hr {
+  height: 0; /* 1 */
+  color: inherit; /* 2 */
+  border-top-width: 1px; /* 3 */
+}
+/*
+Add the correct text decoration in Chrome, Edge, and Safari.
+*/
+.neural-amp-modeler abbr:where([title]) {
+  -webkit-text-decoration: underline dotted;
+          text-decoration: underline dotted;
+}
+/*
+Remove the default font size and weight for headings.
+*/
+.neural-amp-modeler h1, .neural-amp-modeler h2, .neural-amp-modeler h3, .neural-amp-modeler h4, .neural-amp-modeler h5, .neural-amp-modeler h6 {
+  font-size: inherit;
+  font-weight: inherit;
+}
+/*
+Reset links to optimize for opt-in styling instead of opt-out.
+*/
+.neural-amp-modeler a {
+  color: inherit;
+  text-decoration: inherit;
+}
+/*
+Add the correct font weight in Edge and Safari.
+*/
+.neural-amp-modeler b, .neural-amp-modeler strong {
+  font-weight: bolder;
+}
+/*
+1. Use the user's configured `mono` font-family by default.
+2. Use the user's configured `mono` font-feature-settings by default.
+3. Use the user's configured `mono` font-variation-settings by default.
+4. Correct the odd `em` font sizing in all browsers.
+*/
+.neural-amp-modeler code, .neural-amp-modeler kbd, .neural-amp-modeler samp, .neural-amp-modeler pre {
+  font-family: var(--t3k-font-mono); /* 1 */
+  font-feature-settings: normal; /* 2 */
+  font-variation-settings: normal; /* 3 */
+  font-size: 1em; /* 4 */
+}
+/*
+Add the correct font size in all browsers.
+*/
+.neural-amp-modeler small {
+  font-size: 80%;
+}
+/*
+Prevent `sub` and `sup` elements from affecting the line height in all browsers.
+*/
+.neural-amp-modeler sub, .neural-amp-modeler sup {
+  font-size: 75%;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+.neural-amp-modeler sub {
+  bottom: -0.25em;
+}
+.neural-amp-modeler sup {
+  top: -0.5em;
+}
+/*
+1. Remove text indentation from table contents in Chrome and Safari. (https://bugs.chromium.org/p/chromium/issues/detail?id=999088, https://bugs.webkit.org/show_bug.cgi?id=201297)
+2. Correct table border color inheritance in all Chrome and Safari. (https://bugs.chromium.org/p/chromium/issues/detail?id=935729, https://bugs.webkit.org/show_bug.cgi?id=195016)
+3. Remove gaps between table borders by default.
+*/
+.neural-amp-modeler table {
+  text-indent: 0; /* 1 */
+  border-color: inherit; /* 2 */
+  border-collapse: collapse; /* 3 */
+}
+/*
+1. Change the font styles in all browsers.
+2. Remove the margin in Firefox and Safari.
+3. Remove default padding in all browsers.
+*/
+.neural-amp-modeler button, .neural-amp-modeler input, .neural-amp-modeler optgroup, .neural-amp-modeler select, .neural-amp-modeler textarea {
+  font-family: inherit; /* 1 */
+  font-feature-settings: inherit; /* 1 */
+  font-variation-settings: inherit; /* 1 */
+  font-size: 100%; /* 1 */
+  font-weight: inherit; /* 1 */
+  line-height: inherit; /* 1 */
+  color: inherit; /* 1 */
+  margin: 0; /* 2 */
+  padding: 0; /* 3 */
+}
+/*
+Remove the inheritance of text transform in Edge and Firefox.
+*/
+.neural-amp-modeler button, .neural-amp-modeler select {
+  text-transform: none;
+}
+/*
+1. Correct the inability to style clickable types in iOS and Safari.
+2. Remove default button styles.
+*/
+.neural-amp-modeler button, .neural-amp-modeler [type='button'], .neural-amp-modeler [type='reset'], .neural-amp-modeler [type='submit'] {
+  -webkit-appearance: button; /* 1 */
+  background-color: transparent; /* 2 */
+  background-image: none; /* 2 */
+}
+/*
+Use the modern Firefox focus style for all focusable elements.
+*/
+.neural-amp-modeler :-moz-focusring {
+  outline: auto;
+}
+/*
+Remove the additional `:invalid` styles in Firefox. (https://github.com/mozilla/gecko-dev/blob/2f9eacd9d3d995c937b4251a5557d95d494c9be1/layout/style/res/forms.css#L728-L737)
+*/
+.neural-amp-modeler :-moz-ui-invalid {
+  box-shadow: none;
+}
+/*
+Add the correct vertical alignment in Chrome and Firefox.
+*/
+.neural-amp-modeler progress {
+  vertical-align: baseline;
+}
+/*
+Correct the cursor style of increment and decrement buttons in Safari.
+*/
+.neural-amp-modeler ::-webkit-inner-spin-button, .neural-amp-modeler ::-webkit-outer-spin-button {
+  height: auto;
+}
+/*
+1. Correct the odd appearance in Chrome and Safari.
+2. Correct the outline style in Safari.
+*/
+.neural-amp-modeler [type='search'] {
+  -webkit-appearance: textfield; /* 1 */
+  outline-offset: -2px; /* 2 */
+}
+/*
+Remove the inner padding in Chrome and Safari on macOS.
+*/
+.neural-amp-modeler ::-webkit-search-decoration {
+  -webkit-appearance: none;
+}
+/*
+1. Correct the inability to style clickable types in iOS and Safari.
+2. Change font properties to `inherit` in Safari.
+*/
+.neural-amp-modeler ::-webkit-file-upload-button {
+  -webkit-appearance: button; /* 1 */
+  font: inherit; /* 2 */
+}
+/*
+Add the correct display in Chrome and Safari.
+*/
+.neural-amp-modeler summary {
+  display: list-item;
+}
+/*
+Removes the default spacing and border for appropriate elements.
+*/
+.neural-amp-modeler blockquote, .neural-amp-modeler dl, .neural-amp-modeler dd, .neural-amp-modeler h1, .neural-amp-modeler h2, .neural-amp-modeler h3, .neural-amp-modeler h4, .neural-amp-modeler h5, .neural-amp-modeler h6, .neural-amp-modeler hr, .neural-amp-modeler figure, .neural-amp-modeler p, .neural-amp-modeler pre {
+  margin: 0;
+}
+.neural-amp-modeler fieldset {
+  margin: 0;
+  padding: 0;
+}
+.neural-amp-modeler legend {
+  padding: 0;
+}
+.neural-amp-modeler ol, .neural-amp-modeler ul, .neural-amp-modeler menu {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+/*
+Reset default styling for dialogs.
+*/
+.neural-amp-modeler dialog {
+  padding: 0;
+}
+/*
+Prevent resizing textareas horizontally by default.
+*/
+.neural-amp-modeler textarea {
+  resize: vertical;
+}
+/*
+1. Reset the default placeholder opacity in Firefox. (https://github.com/tailwindlabs/tailwindcss/issues/3300)
+2. Set the default placeholder color to the user's configured gray 400 color.
+*/
+.neural-amp-modeler input::-moz-placeholder, .neural-amp-modeler textarea::-moz-placeholder {
+  opacity: 1; /* 1 */
+  color: #9ca3af; /* 2 */
+}
+.neural-amp-modeler input::placeholder, .neural-amp-modeler textarea::placeholder {
+  opacity: 1; /* 1 */
+  color: #9ca3af; /* 2 */
+}
+/*
+Set the default cursor for buttons.
+*/
+.neural-amp-modeler button, .neural-amp-modeler [role="button"] {
+  cursor: pointer;
+}
+/*
+Make sure disabled buttons don't get the pointer cursor.
+*/
+.neural-amp-modeler :disabled {
+  cursor: default;
+}
+/*
+1. Make replaced elements `display: block` by default. (https://github.com/mozdevs/cssremedy/issues/14)
+2. Add `vertical-align: middle` to align replaced elements more sensibly by default. (https://github.com/jensimmons/cssremedy/issues/14#issuecomment-634934210)
+   This can trigger a poorly considered lint error in some tools but is included by design.
+*/
+.neural-amp-modeler img, .neural-amp-modeler svg, .neural-amp-modeler video, .neural-amp-modeler canvas, .neural-amp-modeler audio, .neural-amp-modeler iframe, .neural-amp-modeler embed, .neural-amp-modeler object {
+  display: block; /* 1 */
+  vertical-align: middle; /* 2 */
+}
+/*
+Constrain images and videos to the parent width and preserve their intrinsic aspect ratio. (https://github.com/mozdevs/cssremedy/issues/14)
+*/
+.neural-amp-modeler img, .neural-amp-modeler video {
+  max-width: 100%;
+  height: auto;
+}
+/* Make elements with the HTML hidden attribute stay hidden by default */
+.neural-amp-modeler [hidden] {
+  display: none;
+}
+*, ::before, ::after {
+  --tw-border-spacing-x: 0;
+  --tw-border-spacing-y: 0;
+  --tw-translate-x: 0;
+  --tw-translate-y: 0;
+  --tw-rotate: 0;
+  --tw-skew-x: 0;
+  --tw-skew-y: 0;
+  --tw-scale-x: 1;
+  --tw-scale-y: 1;
+  --tw-pan-x:  ;
+  --tw-pan-y:  ;
+  --tw-pinch-zoom:  ;
+  --tw-scroll-snap-strictness: proximity;
+  --tw-gradient-from-position:  ;
+  --tw-gradient-via-position:  ;
+  --tw-gradient-to-position:  ;
+  --tw-ordinal:  ;
+  --tw-slashed-zero:  ;
+  --tw-numeric-figure:  ;
+  --tw-numeric-spacing:  ;
+  --tw-numeric-fraction:  ;
+  --tw-ring-inset:  ;
+  --tw-ring-offset-width: 0px;
+  --tw-ring-offset-color: #fff;
+  --tw-ring-color: rgb(59 130 246 / 0.5);
+  --tw-ring-offset-shadow: 0 0 #0000;
+  --tw-ring-shadow: 0 0 #0000;
+  --tw-shadow: 0 0 #0000;
+  --tw-shadow-colored: 0 0 #0000;
+  --tw-blur:  ;
+  --tw-brightness:  ;
+  --tw-contrast:  ;
+  --tw-grayscale:  ;
+  --tw-hue-rotate:  ;
+  --tw-invert:  ;
+  --tw-saturate:  ;
+  --tw-sepia:  ;
+  --tw-drop-shadow:  ;
+  --tw-backdrop-blur:  ;
+  --tw-backdrop-brightness:  ;
+  --tw-backdrop-contrast:  ;
+  --tw-backdrop-grayscale:  ;
+  --tw-backdrop-hue-rotate:  ;
+  --tw-backdrop-invert:  ;
+  --tw-backdrop-opacity:  ;
+  --tw-backdrop-saturate:  ;
+  --tw-backdrop-sepia:  ;
+}
+.neural-amp-modeler ::backdrop {
+  --tw-border-spacing-x: 0;
+  --tw-border-spacing-y: 0;
+  --tw-translate-x: 0;
+  --tw-translate-y: 0;
+  --tw-rotate: 0;
+  --tw-skew-x: 0;
+  --tw-skew-y: 0;
+  --tw-scale-x: 1;
+  --tw-scale-y: 1;
+  --tw-pan-x:  ;
+  --tw-pan-y:  ;
+  --tw-pinch-zoom:  ;
+  --tw-scroll-snap-strictness: proximity;
+  --tw-gradient-from-position:  ;
+  --tw-gradient-via-position:  ;
+  --tw-gradient-to-position:  ;
+  --tw-ordinal:  ;
+  --tw-slashed-zero:  ;
+  --tw-numeric-figure:  ;
+  --tw-numeric-spacing:  ;
+  --tw-numeric-fraction:  ;
+  --tw-ring-inset:  ;
+  --tw-ring-offset-width: 0px;
+  --tw-ring-offset-color: #fff;
+  --tw-ring-color: rgb(59 130 246 / 0.5);
+  --tw-ring-offset-shadow: 0 0 #0000;
+  --tw-ring-shadow: 0 0 #0000;
+  --tw-shadow: 0 0 #0000;
+  --tw-shadow-colored: 0 0 #0000;
+  --tw-blur:  ;
+  --tw-brightness:  ;
+  --tw-contrast:  ;
+  --tw-grayscale:  ;
+  --tw-hue-rotate:  ;
+  --tw-invert:  ;
+  --tw-saturate:  ;
+  --tw-sepia:  ;
+  --tw-drop-shadow:  ;
+  --tw-backdrop-blur:  ;
+  --tw-backdrop-brightness:  ;
+  --tw-backdrop-contrast:  ;
+  --tw-backdrop-grayscale:  ;
+  --tw-backdrop-hue-rotate:  ;
+  --tw-backdrop-invert:  ;
+  --tw-backdrop-opacity:  ;
+  --tw-backdrop-saturate:  ;
+  --tw-backdrop-sepia:  ;
+}
+.neural-amp-modeler .container {
+  width: 100%;
+}
+@media (min-width: 640px) {
+  .neural-amp-modeler .container {
+    max-width: 640px;
+  }
+}
+@media (min-width: 768px) {
+  .neural-amp-modeler .container {
+    max-width: 768px;
+  }
+}
+@media (min-width: 1024px) {
+  .neural-amp-modeler .container {
+    max-width: 1024px;
+  }
+}
+@media (min-width: 1280px) {
+  .neural-amp-modeler .container {
+    max-width: 1280px;
+  }
+}
+@media (min-width: 1536px) {
+  .neural-amp-modeler .container {
+    max-width: 1536px;
+  }
+}
+.neural-amp-modeler .sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+.neural-amp-modeler .pointer-events-none {
+  pointer-events: none;
+}
+.neural-amp-modeler .visible {
+  visibility: visible;
+}
+.neural-amp-modeler .invisible {
+  visibility: hidden;
+}
+.neural-amp-modeler .collapse {
+  visibility: collapse;
+}
+.neural-amp-modeler .fixed {
+  position: fixed;
+}
+.neural-amp-modeler .absolute {
+  position: absolute;
+}
+.neural-amp-modeler .relative {
+  position: relative;
+}
+.neural-amp-modeler .inset-0 {
+  inset: 0px;
+}
+.neural-amp-modeler .bottom-full {
+  bottom: 100%;
+}
+.neural-amp-modeler .left-1 {
+  left: 0.25rem;
+}
+.neural-amp-modeler .left-1\/2 {
+  left: 50%;
+}
+.neural-amp-modeler .left-4 {
+  left: 1rem;
+}
+.neural-amp-modeler .right-3 {
+  right: 0.75rem;
+}
+.neural-amp-modeler .top-1 {
+  top: 0.25rem;
+}
+.neural-amp-modeler .top-1\/2 {
+  top: 50%;
+}
+.neural-amp-modeler .z-10 {
+  z-index: 10;
+}
+.neural-amp-modeler .-m-1 {
+  margin: -0.25rem;
+}
+.neural-amp-modeler .-mx-1 {
+  margin-left: -0.25rem;
+  margin-right: -0.25rem;
+}
+.neural-amp-modeler .mx-auto {
+  margin-left: auto;
+  margin-right: auto;
+}
+.neural-amp-modeler .-mb-px {
+  margin-bottom: -1px;
+}
+.neural-amp-modeler .-mt-1 {
+  margin-top: -0.25rem;
+}
+.neural-amp-modeler .-mt-2 {
+  margin-top: -0.5rem;
+}
+.neural-amp-modeler .mb-1 {
+  margin-bottom: 0.25rem;
+}
+.neural-amp-modeler .mb-1\.5 {
+  margin-bottom: 0.375rem;
+}
+.neural-amp-modeler .mt-0 {
+  margin-top: 0px;
+}
+.neural-amp-modeler .mt-0\.5 {
+  margin-top: 0.125rem;
+}
+.neural-amp-modeler .mt-1 {
+  margin-top: 0.25rem;
+}
+.neural-amp-modeler .mt-2 {
+  margin-top: 0.5rem;
+}
+.neural-amp-modeler .line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+.neural-amp-modeler .block {
+  display: block;
+}
+.neural-amp-modeler .inline-block {
+  display: inline-block;
+}
+.neural-amp-modeler .inline {
+  display: inline;
+}
+.neural-amp-modeler .flex {
+  display: flex;
+}
+.neural-amp-modeler .inline-flex {
+  display: inline-flex;
+}
+.neural-amp-modeler .table {
+  display: table;
+}
+.neural-amp-modeler .grid {
+  display: grid;
+}
+.neural-amp-modeler .hidden {
+  display: none;
+}
+.neural-amp-modeler .h-10 {
+  height: 2.5rem;
+}
+.neural-amp-modeler .h-16 {
+  height: 4rem;
+}
+.neural-amp-modeler .h-3 {
+  height: 0.75rem;
+}
+.neural-amp-modeler .h-3\.5 {
+  height: 0.875rem;
+}
+.neural-amp-modeler .h-4 {
+  height: 1rem;
+}
+.neural-amp-modeler .h-5 {
+  height: 1.25rem;
+}
+.neural-amp-modeler .h-6 {
+  height: 1.5rem;
+}
+.neural-amp-modeler .h-64 {
+  height: 16rem;
+}
+.neural-amp-modeler .h-7 {
+  height: 1.75rem;
+}
+.neural-amp-modeler .h-8 {
+  height: 2rem;
+}
+.neural-amp-modeler .h-full {
+  height: 100%;
+}
+.neural-amp-modeler .min-h-\[150px\] {
+  min-height: 150px;
+}
+.neural-amp-modeler .min-h-\[80px\] {
+  min-height: 80px;
+}
+.neural-amp-modeler .min-h-screen {
+  min-height: 100vh;
+}
+.neural-amp-modeler .w-10 {
+  width: 2.5rem;
+}
+.neural-amp-modeler .w-14 {
+  width: 3.5rem;
+}
+.neural-amp-modeler .w-16 {
+  width: 4rem;
+}
+.neural-amp-modeler .w-2\/3 {
+  width: 66.666667%;
+}
+.neural-amp-modeler .w-24 {
+  width: 6rem;
+}
+.neural-amp-modeler .w-3 {
+  width: 0.75rem;
+}
+.neural-amp-modeler .w-32 {
+  width: 8rem;
+}
+.neural-amp-modeler .w-36 {
+  width: 9rem;
+}
+.neural-amp-modeler .w-4 {
+  width: 1rem;
+}
+.neural-amp-modeler .w-5 {
+  width: 1.25rem;
+}
+.neural-amp-modeler .w-7 {
+  width: 1.75rem;
+}
+.neural-amp-modeler .w-\[22px\] {
+  width: 22px;
+}
+.neural-amp-modeler .w-full {
+  width: 100%;
+}
+.neural-amp-modeler .w-px {
+  width: 1px;
+}
+.neural-amp-modeler .min-w-0 {
+  min-width: 0px;
+}
+.neural-amp-modeler .min-w-\[3ch\] {
+  min-width: 3ch;
+}
+.neural-amp-modeler .max-w-\[1100px\] {
+  max-width: 1100px;
+}
+.neural-amp-modeler .max-w-\[360px\] {
+  max-width: 360px;
+}
+.neural-amp-modeler .max-w-full {
+  max-width: 100%;
+}
+.neural-amp-modeler .max-w-md {
+  max-width: 28rem;
+}
+.neural-amp-modeler .max-w-sm {
+  max-width: 24rem;
+}
+.neural-amp-modeler .flex-1 {
+  flex: 1 1 0%;
+}
+.neural-amp-modeler .flex-shrink-0 {
+  flex-shrink: 0;
+}
+.neural-amp-modeler .grow {
+  flex-grow: 1;
+}
+.neural-amp-modeler .-translate-x-1\/2 {
+  --tw-translate-x: -50%;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+.neural-amp-modeler .-translate-y-1\/2 {
+  --tw-translate-y: -50%;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+.neural-amp-modeler .translate-x-full {
+  --tw-translate-x: 100%;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+.neural-amp-modeler .transform {
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.neural-amp-modeler .animate-spin {
+  animation: spin 1s linear infinite;
+}
+.neural-amp-modeler .cursor-\[inherit\] {
+  cursor: inherit;
+}
+.neural-amp-modeler .cursor-not-allowed {
+  cursor: not-allowed;
+}
+.neural-amp-modeler .cursor-pointer {
+  cursor: pointer;
+}
+.neural-amp-modeler .cursor-wait {
+  cursor: wait;
+}
+.neural-amp-modeler .touch-none {
+  touch-action: none;
+}
+.neural-amp-modeler .resize {
+  resize: both;
+}
+.neural-amp-modeler .list-inside {
+  list-style-position: inside;
+}
+.neural-amp-modeler .list-decimal {
+  list-style-type: decimal;
+}
+.neural-amp-modeler .flex-row {
+  flex-direction: row;
+}
+.neural-amp-modeler .flex-row-reverse {
+  flex-direction: row-reverse;
+}
+.neural-amp-modeler .flex-col {
+  flex-direction: column;
+}
+.neural-amp-modeler .flex-wrap {
+  flex-wrap: wrap;
+}
+.neural-amp-modeler .flex-nowrap {
+  flex-wrap: nowrap;
+}
+.neural-amp-modeler .items-start {
+  align-items: flex-start;
+}
+.neural-amp-modeler .items-end {
+  align-items: flex-end;
+}
+.neural-amp-modeler .items-center {
+  align-items: center;
+}
+.neural-amp-modeler .items-baseline {
+  align-items: baseline;
+}
+.neural-amp-modeler .justify-end {
+  justify-content: flex-end;
+}
+.neural-amp-modeler .justify-center {
+  justify-content: center;
+}
+.neural-amp-modeler .justify-between {
+  justify-content: space-between;
+}
+.neural-amp-modeler .gap-0 {
+  gap: 0px;
+}
+.neural-amp-modeler .gap-0\.5 {
+  gap: 0.125rem;
+}
+.neural-amp-modeler .gap-1 {
+  gap: 0.25rem;
+}
+.neural-amp-modeler .gap-1\.5 {
+  gap: 0.375rem;
+}
+.neural-amp-modeler .gap-10 {
+  gap: 2.5rem;
+}
+.neural-amp-modeler .gap-2 {
+  gap: 0.5rem;
+}
+.neural-amp-modeler .gap-3 {
+  gap: 0.75rem;
+}
+.neural-amp-modeler .gap-4 {
+  gap: 1rem;
+}
+.neural-amp-modeler .gap-5 {
+  gap: 1.25rem;
+}
+.neural-amp-modeler .gap-x-2 {
+  -moz-column-gap: 0.5rem;
+       column-gap: 0.5rem;
+}
+.neural-amp-modeler .gap-x-3 {
+  -moz-column-gap: 0.75rem;
+       column-gap: 0.75rem;
+}
+.neural-amp-modeler .gap-x-5 {
+  -moz-column-gap: 1.25rem;
+       column-gap: 1.25rem;
+}
+.neural-amp-modeler .gap-y-1 {
+  row-gap: 0.25rem;
+}
+.neural-amp-modeler .space-y-1 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-y-reverse: 0;
+  margin-top: calc(0.25rem * calc(1 - var(--tw-space-y-reverse)));
+  margin-bottom: calc(0.25rem * var(--tw-space-y-reverse));
+}
+.neural-amp-modeler .self-start {
+  align-self: flex-start;
+}
+.neural-amp-modeler .overflow-auto {
+  overflow: auto;
+}
+.neural-amp-modeler .overflow-hidden {
+  overflow: hidden;
+}
+.neural-amp-modeler .truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.neural-amp-modeler .whitespace-nowrap {
+  white-space: nowrap;
+}
+.neural-amp-modeler .whitespace-pre-wrap {
+  white-space: pre-wrap;
+}
+.neural-amp-modeler .rounded {
+  border-radius: 0.25rem;
+}
+.neural-amp-modeler .rounded-full {
+  border-radius: 9999px;
+}
+.neural-amp-modeler .rounded-lg {
+  border-radius: 0.5rem;
+}
+.neural-amp-modeler .rounded-md {
+  border-radius: 0.375rem;
+}
+.neural-amp-modeler .rounded-sm {
+  border-radius: 0.125rem;
+}
+.neural-amp-modeler .rounded-t3k {
+  border-radius: var(--t3k-radius);
+}
+.neural-amp-modeler .rounded-t3k-sm {
+  border-radius: var(--t3k-radius-sm);
+}
+.neural-amp-modeler .rounded-b-t3k {
+  border-bottom-right-radius: var(--t3k-radius);
+  border-bottom-left-radius: var(--t3k-radius);
+}
+.neural-amp-modeler .rounded-t-t3k {
+  border-top-left-radius: var(--t3k-radius);
+  border-top-right-radius: var(--t3k-radius);
+}
+.neural-amp-modeler .border {
+  border-width: 1px;
+}
+.neural-amp-modeler .border-b {
+  border-bottom-width: 1px;
+}
+.neural-amp-modeler .border-b-0 {
+  border-bottom-width: 0px;
+}
+.neural-amp-modeler .border-b-2 {
+  border-bottom-width: 2px;
+}
+.neural-amp-modeler .border-t-0 {
+  border-top-width: 0px;
+}
+.neural-amp-modeler .border-fg {
+  border-color: var(--t3k-fg);
+}
+.neural-amp-modeler .border-line {
+  border-color: var(--t3k-line);
+}
+.neural-amp-modeler .border-line-strong {
+  border-color: var(--t3k-line-strong);
+}
+.neural-amp-modeler .border-transparent {
+  border-color: transparent;
+}
+.neural-amp-modeler .bg-accent {
+  background-color: var(--t3k-accent);
+}
+.neural-amp-modeler .bg-canvas {
+  background-color: var(--t3k-canvas);
+}
+.neural-amp-modeler .bg-line {
+  background-color: var(--t3k-line);
+}
+.neural-amp-modeler .bg-muted {
+  background-color: var(--t3k-muted);
+}
+.neural-amp-modeler .bg-surface {
+  background-color: var(--t3k-surface);
+}
+.neural-amp-modeler .bg-surface-2 {
+  background-color: var(--t3k-surface-2);
+}
+.neural-amp-modeler .bg-toggle-knob {
+  background-color: var(--t3k-toggle-knob);
+}
+.neural-amp-modeler .bg-toggle-off {
+  background-color: var(--t3k-toggle-off);
+}
+.neural-amp-modeler .bg-toggle-on {
+  background-color: var(--t3k-toggle-on);
+}
+.neural-amp-modeler .bg-transparent {
+  background-color: transparent;
+}
+.neural-amp-modeler .object-cover {
+  -o-object-fit: cover;
+     object-fit: cover;
+}
+.neural-amp-modeler .p-0 {
+  padding: 0px;
+}
+.neural-amp-modeler .p-1 {
+  padding: 0.25rem;
+}
+.neural-amp-modeler .p-3 {
+  padding: 0.75rem;
+}
+.neural-amp-modeler .p-4 {
+  padding: 1rem;
+}
+.neural-amp-modeler .p-5 {
+  padding: 1.25rem;
+}
+.neural-amp-modeler .px-1 {
+  padding-left: 0.25rem;
+  padding-right: 0.25rem;
+}
+.neural-amp-modeler .px-1\.5 {
+  padding-left: 0.375rem;
+  padding-right: 0.375rem;
+}
+.neural-amp-modeler .px-3 {
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+}
+.neural-amp-modeler .px-4 {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+.neural-amp-modeler .px-5 {
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+}
+.neural-amp-modeler .px-6 {
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+.neural-amp-modeler .px-\[6px\] {
+  padding-left: 6px;
+  padding-right: 6px;
+}
+.neural-amp-modeler .py-0 {
+  padding-top: 0px;
+  padding-bottom: 0px;
+}
+.neural-amp-modeler .py-0\.5 {
+  padding-top: 0.125rem;
+  padding-bottom: 0.125rem;
+}
+.neural-amp-modeler .py-2 {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+.neural-amp-modeler .py-3 {
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+}
+.neural-amp-modeler .py-4 {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+.neural-amp-modeler .py-5 {
+  padding-top: 1.25rem;
+  padding-bottom: 1.25rem;
+}
+.neural-amp-modeler .py-\[1px\] {
+  padding-top: 1px;
+  padding-bottom: 1px;
+}
+.neural-amp-modeler .pb-1 {
+  padding-bottom: 0.25rem;
+}
+.neural-amp-modeler .pb-2 {
+  padding-bottom: 0.5rem;
+}
+.neural-amp-modeler .pb-3 {
+  padding-bottom: 0.75rem;
+}
+.neural-amp-modeler .pr-11 {
+  padding-right: 2.75rem;
+}
+.neural-amp-modeler .pt-1 {
+  padding-top: 0.25rem;
+}
+.neural-amp-modeler .pt-2 {
+  padding-top: 0.5rem;
+}
+.neural-amp-modeler .text-center {
+  text-align: center;
+}
+.neural-amp-modeler .font-mono {
+  font-family: var(--t3k-font-mono);
+}
+.neural-amp-modeler .text-\[11px\] {
+  font-size: 11px;
+}
+.neural-amp-modeler .text-base {
+  font-size: 1rem;
+  line-height: 1.5rem;
+}
+.neural-amp-modeler .text-lg {
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+}
+.neural-amp-modeler .text-sm {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+.neural-amp-modeler .text-xs {
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+.neural-amp-modeler .font-medium {
+  font-weight: 500;
+}
+.neural-amp-modeler .font-semibold {
+  font-weight: 600;
+}
+.neural-amp-modeler .uppercase {
+  text-transform: uppercase;
+}
+.neural-amp-modeler .tabular-nums {
+  --tw-numeric-spacing: tabular-nums;
+  font-variant-numeric: var(--tw-ordinal) var(--tw-slashed-zero) var(--tw-numeric-figure) var(--tw-numeric-spacing) var(--tw-numeric-fraction);
+}
+.neural-amp-modeler .leading-4 {
+  line-height: 1rem;
+}
+.neural-amp-modeler .leading-tight {
+  line-height: 1.25;
+}
+.neural-amp-modeler .tracking-wider {
+  letter-spacing: 0.05em;
+}
+.neural-amp-modeler .text-canvas {
+  color: var(--t3k-canvas);
+}
+.neural-amp-modeler .text-danger {
+  color: var(--t3k-danger);
+}
+.neural-amp-modeler .text-fg {
+  color: var(--t3k-fg);
+}
+.neural-amp-modeler .text-link {
+  color: var(--t3k-link);
+}
+.neural-amp-modeler .text-muted {
+  color: var(--t3k-muted);
+}
+.neural-amp-modeler .text-muted-2 {
+  color: var(--t3k-muted-2);
+}
+.neural-amp-modeler .text-warning {
+  color: var(--t3k-warning);
+}
+.neural-amp-modeler .underline {
+  text-decoration-line: underline;
+}
+.neural-amp-modeler .opacity-0 {
+  opacity: 0;
+}
+.neural-amp-modeler .opacity-50 {
+  opacity: 0.5;
+}
+.neural-amp-modeler .shadow {
+  --tw-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --tw-shadow-colored: 0 1px 3px 0 var(--tw-shadow-color), 0 1px 2px -1px var(--tw-shadow-color);
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+}
+.neural-amp-modeler .shadow-inner {
+  --tw-shadow: inset 0 2px 4px 0 rgb(0 0 0 / 0.05);
+  --tw-shadow-colored: inset 0 2px 4px 0 var(--tw-shadow-color);
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+}
+.neural-amp-modeler .outline {
+  outline-style: solid;
+}
+.neural-amp-modeler .\!ring {
+  --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color) !important;
+  --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(3px + var(--tw-ring-offset-width)) var(--tw-ring-color) !important;
+  box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000) !important;
+}
+.neural-amp-modeler .ring {
+  --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);
+  --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(3px + var(--tw-ring-offset-width)) var(--tw-ring-color);
+  box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000);
+}
+.neural-amp-modeler .grayscale {
+  --tw-grayscale: grayscale(100%);
+  filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow);
+}
+.neural-amp-modeler .filter {
+  filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow);
+}
+.neural-amp-modeler .transition {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, -webkit-backdrop-filter;
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter, -webkit-backdrop-filter;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+.neural-amp-modeler .transition-colors {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+.neural-amp-modeler .transition-transform {
+  transition-property: transform;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+.neural-amp-modeler .duration-150 {
+  transition-duration: 150ms;
+}
+.neural-amp-modeler .duration-300 {
+  transition-duration: 300ms;
+}
+.neural-amp-modeler .ease-in-out {
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ---------------------------------------------------------------------------
+ * Design tokens
+ *
+ * Every color, radius and font in the player resolves through one of these
+ * variables (via the Tailwind theme in tailwind.config.js), so a theme is a
+ * token sheet, not a code change. Both sheets share one geometry; only the
+ * palette differs. The package does not load fonts: hosts that ship Figtree /
+ * JetBrains Mono get them, everyone else gets the system stack.
+ * ------------------------------------------------------------------------- */
+.neural-amp-modeler {
+  --t3k-font:
+    Figtree, -apple-system, system-ui, BlinkMacSystemFont, 'Helvetica Neue',
+    Helvetica, Arial, sans-serif;
+  --t3k-font-mono:
+    'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --t3k-radius: 12px;
+  --t3k-radius-sm: 8px;
+  /* The on/off switch keeps the dark-theme colors in every theme. */
+  --t3k-toggle-on: #00d13b;
+  --t3k-toggle-off: #71717a;
+  --t3k-toggle-knob: #ffffff;
+}
+
+.neural-amp-modeler,
+.neural-amp-modeler[data-theme='dark'] {
+  --t3k-canvas: #000000;
+  --t3k-surface: #18181b;
+  --t3k-surface-2: #27272a;
+  --t3k-line: #3f3f46;
+  --t3k-line-strong: #71717a;
+  --t3k-fg: #ffffff;
+  --t3k-muted: #a1a1aa;
+  --t3k-muted-2: #d4d4d8;
+  --t3k-accent: #ffffff;
+  --t3k-on-accent: #000000;
+  --t3k-primary: linear-gradient(180deg, #0000ff 0%, #0000d0 100%);
+  --t3k-on-primary: #ffffff;
+  --t3k-link: #6b9bff;
+  --t3k-success: #00d13b;
+  --t3k-danger: #ff3b3b;
+  --t3k-warning: #f0b429;
+  color-scheme: dark;
+}
+
+.neural-amp-modeler[data-theme='light'] {
+  --t3k-canvas: #ffffff;
+  --t3k-surface: #ffffff;
+  --t3k-surface-2: #efefef;
+  --t3k-line: #e3e3e3;
+  --t3k-line-strong: #c9c9c9;
+  --t3k-fg: #1a1a1a;
+  --t3k-muted: #666666;
+  --t3k-muted-2: #444444;
+  --t3k-accent: #1a1a1a;
+  --t3k-on-accent: #ffffff;
+  --t3k-primary: linear-gradient(180deg, #0000ff 0%, #0000d0 100%);
+  --t3k-on-primary: #ffffff;
+  --t3k-link: #1d5fd1;
+  --t3k-success: #0a7d3b;
+  --t3k-danger: #c8102e;
+  --t3k-warning: #b97f00;
+  color-scheme: light;
+}
+
+/* Custom component wrapper class */
+.neural-amp-modeler {
+  font-family: var(--t3k-font);
+  line-height: 1.5;
+  color: var(--t3k-fg);
+  /* No background here: the panel paints its own surface inside its rounded
+     border, so whatever the host puts behind the player shows at the
+     corners (embeds on light pages, cards, transparent frames). */
+  text-rendering: optimizeLegibility;
+  --tw-bg-opacity: 1;
+  --tw-text-opacity: 1;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Scope Tailwind utilities to only work within the component */
+.neural-amp-modeler * {
+  /* This ensures all Tailwind utilities are scoped to the component */
+  box-sizing: border-box;
+}
+
+/* Primary button fill. A token so partners can swap the TONE3000 blue
+ * gradient for a flat brand colour; `accent` stays with the transport. */
+.neural-amp-modeler .t3k-btn-primary {
+  background: var(--t3k-primary);
+  color: var(--t3k-on-primary);
+}
+
+/* Native <select>: strip the UA chrome, keep the OS popup (which renders
+ * outside any iframe bounds). The chevron is drawn by NativeSelect. */
+.neural-amp-modeler .t3k-select {
+  -moz-appearance: none;
+       appearance: none;
+  -webkit-appearance: none;
+  background-color: transparent;
+}
+.neural-amp-modeler .t3k-select option {
+  background-color: var(--t3k-surface);
+  color: var(--t3k-fg);
+}
+
+/* Source tabs + attribution share one row. The attribution steps down as
+ * the row narrows: "Powered by" + TONE3000 wordmark (~180px) → wordmark
+ * alone (~105px) → the T3K mark (42px). Next to both tabs (~200px + 16px
+ * gap) the first needs ~395px of content box, the second ~320px; the
+ * thresholds add a little slack. Without tabs (`live={false}`) only the
+ * attribution's own width matters. Container queries so it follows the
+ * player's width, not the viewport (content box, see below). */
+.neural-amp-modeler .t3k-tabbar {
+  container-type: inline-size;
+}
+.neural-amp-modeler .t3k-powered-logo, .neural-amp-modeler .t3k-powered-mark {
+  display: none;
+}
+.neural-amp-modeler .t3k-powered-logo {
+  display: block;
+}
+@container (max-width: 409px) {
+  .neural-amp-modeler .t3k-has-tabs .t3k-powered-text {
+    display: none;
+  }
+}
+@container (max-width: 335px) {
+  .neural-amp-modeler .t3k-has-tabs .t3k-powered-logo {
+    display: none;
+  }
+  .neural-amp-modeler .t3k-has-tabs .t3k-powered-mark {
+    display: block;
+  }
+}
+@container (max-width: 199px) {
+  .neural-amp-modeler .t3k-no-tabs .t3k-powered-text {
+    display: none;
+  }
+}
+@container (max-width: 119px) {
+  .neural-amp-modeler .t3k-no-tabs .t3k-powered-logo {
+    display: none;
+  }
+  .neural-amp-modeler .t3k-no-tabs .t3k-powered-mark {
+    display: block;
+  }
+}
+
+/* Controls body. The "Input: … · Cab: …" line is one row that truncates, or
+ * two stacked rows under ~380px. Keyed to the body's width (not the option
+ * text) so the skeleton and the real controls are always the same height. */
+.neural-amp-modeler .t3k-body {
+  container-type: inline-size;
+}
+@container (max-width: 347px) {
+  .neural-amp-modeler .t3k-inline-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* Tone header + pager. Under ~480px the title has no room next to ‹ n/N ›,
+ * so the pager drops to its own row. (Container queries measure the
+ * content box, so these thresholds are the row's width minus its padding.) */
+.neural-amp-modeler .t3k-header {
+  container-type: inline-size;
+  row-gap: 0.75rem;
+}
+@container (max-width: 447px) {
+  .neural-amp-modeler .t3k-header-pager {
+    flex-basis: 100%;
+    justify-content: flex-end;
+  }
+}
+
+/* Skeleton shimmer for the loading state. */
+@keyframes t3k-shimmer {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+.neural-amp-modeler .t3k-skeleton {
+  background-color: var(--t3k-surface-2);
+  animation: t3k-shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes monitor-pop {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Remove all focus indicators from monitor button - browser defaults vary */
+.neural-amp-modeler .monitor-button-reset-focus:focus, .neural-amp-modeler .monitor-button-reset-focus:focus-visible, .neural-amp-modeler .monitor-button-reset-focus:active {
+  outline: none !important;
+  box-shadow: none !important;
+}
+.neural-amp-modeler .focus-within\:ring-2:focus-within {
+  --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);
+  --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);
+  box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000);
+}
+.neural-amp-modeler .focus-within\:ring-fg:focus-within {
+  --tw-ring-color: var(--t3k-fg);
+}
+.neural-amp-modeler .hover\:text-fg:hover {
+  color: var(--t3k-fg);
+}
+.neural-amp-modeler .hover\:underline:hover {
+  text-decoration-line: underline;
+}
+.neural-amp-modeler .focus\:outline-none:focus {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+}
+.neural-amp-modeler .focus-visible\:border-fg:focus-visible {
+  border-color: var(--t3k-fg);
+}
+.neural-amp-modeler .focus-visible\:ring-2:focus-visible {
+  --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);
+  --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);
+  box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000);
+}
+.neural-amp-modeler .focus-visible\:ring-fg:focus-visible {
+  --tw-ring-color: var(--t3k-fg);
+}
+.neural-amp-modeler .focus-visible\:ring-link:focus-visible {
+  --tw-ring-color: var(--t3k-link);
+}
+.neural-amp-modeler .disabled\:cursor-not-allowed:disabled {
+  cursor: not-allowed;
+}
+.neural-amp-modeler .disabled\:opacity-40:disabled {
+  opacity: 0.4;
+}
+.neural-amp-modeler .disabled\:opacity-50:disabled {
+  opacity: 0.5;
+}
+.neural-amp-modeler .disabled\:hover\:text-muted-2:hover:disabled {
+  color: var(--t3k-muted-2);
+}
+@media (min-width: 640px) {
+  .neural-amp-modeler .sm\:block {
+    display: block;
+  }
+  .neural-amp-modeler .sm\:flex {
+    display: flex;
+  }
+  .neural-amp-modeler .sm\:gap-4 {
+    gap: 1rem;
+  }
+  .neural-amp-modeler .sm\:px-6 {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+  .neural-amp-modeler .sm\:py-3 {
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+  }
+  .neural-amp-modeler .sm\:py-4 {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+  }
+  .neural-amp-modeler .sm\:py-5 {
+    padding-top: 1.25rem;
+    padding-bottom: 1.25rem;
+  }
+  .neural-amp-modeler .sm\:pb-4 {
+    padding-bottom: 1rem;
+  }
+  .neural-amp-modeler .sm\:text-base {
+    font-size: 1rem;
+    line-height: 1.5rem;
+  }
+  .neural-amp-modeler .sm\:text-lg {
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+  }
+  .neural-amp-modeler .sm\:text-sm {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+}
+@media (min-width: 1024px) {
+  .neural-amp-modeler .lg\:sticky {
+    position: sticky;
+  }
+  .neural-amp-modeler .lg\:top-5 {
+    top: 1.25rem;
+  }
+  .neural-amp-modeler .lg\:grid-cols-\[1fr_320px\] {
+    grid-template-columns: 1fr 320px;
+  }
+}
+.neural-amp-modeler .\[\&\.clipped\]\:bg-danger.clipped {
+  background-color: var(--t3k-danger);
+}

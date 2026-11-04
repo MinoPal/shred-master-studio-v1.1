@@ -17,9 +17,7 @@ const useLanguage = () => useContext(LanguageContext);
 // ==========================================
 const realModels = [
   { name: "800 Clean", file: "800 clean.nam" },
-  { name: "HiWatt Full Rig", file: "HiWatt_full_rig_2.nam" },
   { name: "Welcome To The Jungle", file: "Welcome To The Jungle.nam" },
-  { name: "Marshall JTM45 ACDC", file: "Marshall JTM45+cab ACDC setting album...nam" },
   { name: "...And Justice For All", file: "...And Justice For All.nam" },
   { name: "Black Album", file: "Black Album.nam" },
   { name: "Master Of Puppets", file: "Master Of Puppets.nam" },
