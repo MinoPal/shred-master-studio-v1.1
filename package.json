@@ -83,8 +83,10 @@
     "typescript-eslint": "^7.3.1",
     "vite": "^6.0.0"
   },
-  "overrides": {
+"overrides": {
     "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "react-dom": "^19.2.0",
+    "neural-amp-modeler-wasm": {
+      "react": "$react"
+    }
   }
-}
