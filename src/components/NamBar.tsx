@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect, createContext, useContext } from 'react';
-import { Sliders, Zap, CheckCircle2, AlertCircle, HardDrive, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Globe } from 'lucide-react';
+import { Sliders, Zap, CheckCircle2, AlertCircle, HardDrive, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Globe, RefreshCw } from 'lucide-react';
 
 // ==========================================
-// 1. MOCK DEL LANGUAGE CONTEXT (uguale a Shred Master)
+// 1. MOCK DEL LANGUAGE CONTEXT
 // ==========================================
 type Language = 'it' | 'en' | 'es';
 const LanguageContext = createContext<{ language: Language; setLanguage: (lang: Language) => void }>({
@@ -13,7 +13,7 @@ const LanguageContext = createContext<{ language: Language; setLanguage: (lang: 
 const useLanguage = () => useContext(LanguageContext);
 
 // ==========================================
-// 2. LISTA MODELLI E TRADUZIONI (da NamBar.tsx originale)
+// 2. LISTA MODELLI E TRADUZIONI
 // ==========================================
 const realModels = [
   { name: "800 Clean", file: "800 clean.nam" },
@@ -51,6 +51,7 @@ const translations = {
     connectGuitar: "Collega Chitarra & Avvia NAM",
     disconnectAudio: "Disconnetti Audio",
     errorAlert: "Impossibile avviare il motore NAM.",
+    rescan: "Aggiorna dispositivi"
   },
   en: {
     standby: "Standby",
@@ -64,6 +65,7 @@ const translations = {
     connectGuitar: "Connect Guitar & Start NAM",
     disconnectAudio: "Disconnect Audio",
     errorAlert: "Unable to start the NAM engine.",
+    rescan: "Refresh devices"
   },
   es: {
     standby: "En Espera",
@@ -77,11 +79,12 @@ const translations = {
     connectGuitar: "Conectar Guitarra e Iniciar NAM",
     disconnectAudio: "Desconectar Audio",
     errorAlert: "No se pudo iniciar el motor NAM.",
+    rescan: "Actualizar dispositivos"
   },
 };
 
 // ==========================================
-// 3. COMPONENTE NAMBAR (Identico al tuo)
+// 3. COMPONENTE NAMBAR (Con scansione forzata & Auto-Detect)
 // ==========================================
 export function NamBar() {
   const { language } = useLanguage() as { language: 'it' | 'en' | 'es' };
@@ -93,6 +96,7 @@ export function NamBar() {
   const [selectedModelIndex, setSelectedModelIndex] = useState<number>(0);
   const [activeDeviceLabel, setActiveDeviceLabel] = useState<string>('');
   const [isPanelOpen, setIsPanelOpen] = useState<boolean>(true);
+  const [isScanning, setIsScanning] = useState<boolean>(false);
 
   const audioCtxRef = useRef<AudioContext | null>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
@@ -102,29 +106,61 @@ export function NamBar() {
 
   const currentModelObj = realModels[selectedModelIndex];
 
-  useEffect(() => {
-    async function loadDevices() {
-      try {
-        await navigator.mediaDevices.getUserMedia({ audio: true });
-        const devices = await navigator.mediaDevices.enumerateDevices();
-        const inputs = devices.filter((d) => d.kind === 'audioinput');
-        setDetectedDevices(inputs);
-        if (inputs.length > 0) {
-          const preferred = inputs.find(
-            (d) =>
-              d.label.toLowerCase().includes('m-audio') ||
-              d.label.toLowerCase().includes('fast track') ||
-              d.label.toLowerCase().includes('usb') ||
-              d.label.toLowerCase().includes('line')
-          );
-          setSelectedDeviceId(preferred ? preferred.deviceId : inputs[0].deviceId);
-        }
-      } catch (err) {
-        console.error("Errore enumerazione dispositivi:", err);
+  // Funzione di scansione attiva hardware
+  async function refreshAudioDevices(autoSelectNew = false) {
+    setIsScanning(true);
+    try {
+      // Stream temporaneo per forzare l'enumerazione con i nomi corretti dell'hardware appena collegato
+      const tempStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      
+      // Chiudiamo subito lo stream temporaneo
+      tempStream.getTracks().forEach((track) => track.stop());
+
+      const inputs = devices.filter((d) => d.kind === 'audioinput');
+      setDetectedDevices(inputs);
+
+      if (inputs.length > 0) {
+        const preferred = inputs.find(
+          (d) =>
+            d.label.toLowerCase().includes('m-audio') ||
+            d.label.toLowerCase().includes('fast track') ||
+            d.label.toLowerCase().includes('rig') ||
+            d.label.toLowerCase().includes('scarlett') ||
+            d.label.toLowerCase().includes('usb') ||
+            d.label.toLowerCase().includes('line')
+        );
+
+        setSelectedDeviceId((prevId) => {
+          if (autoSelectNew || !prevId || !inputs.some((d) => d.deviceId === prevId)) {
+            return preferred ? preferred.deviceId : inputs[0].deviceId;
+          }
+          return prevId;
+        });
       }
+    } catch (err) {
+      console.error("Errore durante la scansione dei dispositivi audio:", err);
+    } finally {
+      setIsScanning(false);
     }
-    loadDevices();
+  }
+
+  useEffect(() => {
+    refreshAudioDevices();
+
+    // Rilevamento in tempo reale dell'inserimento/disinserimento cavo USB
+    const handleDeviceChange = () => {
+      refreshAudioDevices(true);
+    };
+
+    if (navigator.mediaDevices && navigator.mediaDevices.addEventListener) {
+      navigator.mediaDevices.addEventListener('devicechange', handleDeviceChange);
+    }
+
     return () => {
+      if (navigator.mediaDevices && navigator.mediaDevices.removeEventListener) {
+        navigator.mediaDevices.removeEventListener('devicechange', handleDeviceChange);
+      }
       disconnectAudioLine();
     };
   }, []);
@@ -275,11 +311,24 @@ export function NamBar() {
         {isPanelOpen && (
           <div className="p-4 space-y-4 bg-neutral-900/95 border-t border-neutral-800 animate-fadeIn" onClick={(e) => e.stopPropagation()}>
             
-            {/* Selezione Scheda Audio */}
+            {/* Selezione Scheda Audio + Pulsante Riscansione */}
             <div>
-              <label className="block text-[11px] font-bold uppercase tracking-wider text-neutral-400 mb-1.5 flex items-center gap-1.5">
-                <HardDrive className="h-3.5 w-3.5 text-amber-500" /> {t.audioInterface}
-              </label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="text-[11px] font-bold uppercase tracking-wider text-neutral-400 flex items-center gap-1.5">
+                  <HardDrive className="h-3.5 w-3.5 text-amber-500" /> {t.audioInterface}
+                </label>
+                <button
+                  type="button"
+                  onClick={() => refreshAudioDevices(true)}
+                  disabled={audioConnected || isScanning}
+                  title={t.rescan}
+                  className="flex items-center gap-1 text-[10px] font-bold text-amber-400 hover:text-amber-300 disabled:opacity-40 cursor-pointer"
+                >
+                  <RefreshCw className={`h-3 w-3 ${isScanning ? 'animate-spin' : ''}`} />
+                  <span>{t.rescan}</span>
+                </button>
+              </div>
+
               <select
                 value={selectedDeviceId}
                 onChange={(e) => setSelectedDeviceId(e.target.value)}
@@ -367,7 +416,7 @@ export function NamBar() {
 }
 
 // ==========================================
-// 4. APP PRINCIPALE DELLA SANDBOX (con LanguageSelector integrato)
+// 4. APP PRINCIPALE DELLA SANDBOX
 // ==========================================
 export default function App() {
   const [language, setLanguage] = useState<Language>('it');
@@ -376,7 +425,6 @@ export default function App() {
     <LanguageContext.Provider value={{ language, setLanguage }}>
       <div className="min-h-screen bg-neutral-950 p-6 flex flex-col items-center justify-center">
         
-        {/* Selettore Lingua con le bandierine (simile al tuo LanguageSelector.tsx) */}
         <div className="w-full max-w-xl flex justify-end mb-4">
           <div className="flex items-center gap-1">
             <div className="flex items-center gap-2 bg-neutral-900 border border-neutral-800 px-3 py-1.5 rounded-lg shadow-md">
@@ -394,7 +442,6 @@ export default function App() {
           </div>
         </div>
 
-        {/* Qui viene montata la NamBar esatta che sposterai su Shred Master */}
         <div className="w-full max-w-xl">
           <NamBar />
         </div>
