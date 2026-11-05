@@ -1,19 +1,9 @@
-import React, { useState, useRef, useEffect, createContext, useContext } from 'react';
-import { Sliders, Zap, CheckCircle2, AlertCircle, HardDrive, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Globe, RefreshCw } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Sliders, Zap, CheckCircle2, AlertCircle, HardDrive, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, RefreshCw } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 // ==========================================
-// 1. MOCK DEL LANGUAGE CONTEXT
-// ==========================================
-type Language = 'it' | 'en' | 'es';
-const LanguageContext = createContext<{ language: Language; setLanguage: (lang: Language) => void }>({
-  language: 'it',
-  setLanguage: () => {},
-});
-
-const useLanguage = () => useContext(LanguageContext);
-
-// ==========================================
-// 2. LISTA MODELLI E TRADUZIONI
+// 1. LISTA MODELLI E TRADUZIONI GLOBALI
 // ==========================================
 const realModels = [
   { name: "800 Clean", file: "800 clean.nam" },
@@ -51,7 +41,9 @@ const translations = {
     connectGuitar: "Collega Chitarra & Avvia NAM",
     disconnectAudio: "Disconnetti Audio",
     errorAlert: "Impossibile avviare il motore NAM.",
-    rescan: "Aggiorna dispositivi"
+    rescan: "Aggiorna dispositivi",
+    prevModel: "Profilo precedente",
+    nextModel: "Profilo successivo"
   },
   en: {
     standby: "Standby",
@@ -65,7 +57,9 @@ const translations = {
     connectGuitar: "Connect Guitar & Start NAM",
     disconnectAudio: "Disconnect Audio",
     errorAlert: "Unable to start the NAM engine.",
-    rescan: "Refresh devices"
+    rescan: "Refresh devices",
+    prevModel: "Previous profile",
+    nextModel: "Next profile"
   },
   es: {
     standby: "En Espera",
@@ -79,16 +73,20 @@ const translations = {
     connectGuitar: "Conectar Guitarra e Iniciar NAM",
     disconnectAudio: "Desconectar Audio",
     errorAlert: "No se pudo iniciar el motor NAM.",
-    rescan: "Actualizar dispositivos"
+    rescan: "Actualizar dispositivos",
+    prevModel: "Perfil anterior",
+    nextModel: "Perfil siguiente"
   },
 };
 
 // ==========================================
-// 3. COMPONENTE NAMBAR (Con scansione forzata & Auto-Detect)
+// 2. COMPONENTE NAMBAR
 // ==========================================
 export function NamBar() {
-  const { language } = useLanguage() as { language: 'it' | 'en' | 'es' };
-  const t = translations[language] || translations.en;
+  const { lang, language } = useLanguage() as any;
+  const rawLang = (lang || language || "en").toString().toLowerCase();
+  const currentLang = rawLang.includes("it") ? "it" : rawLang.includes("es") ? "es" : "en";
+  const t = translations[currentLang as keyof typeof translations] || translations.en;
 
   const [audioConnected, setAudioConnected] = useState(false);
   const [detectedDevices, setDetectedDevices] = useState<MediaDeviceInfo[]>([]);
@@ -106,15 +104,11 @@ export function NamBar() {
 
   const currentModelObj = realModels[selectedModelIndex];
 
-  // Funzione di scansione attiva hardware
   async function refreshAudioDevices(autoSelectNew = false) {
     setIsScanning(true);
     try {
-      // Stream temporaneo per forzare l'enumerazione con i nomi corretti dell'hardware appena collegato
       const tempStream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const devices = await navigator.mediaDevices.enumerateDevices();
-      
-      // Chiudiamo subito lo stream temporaneo
       tempStream.getTracks().forEach((track) => track.stop());
 
       const inputs = devices.filter((d) => d.kind === 'audioinput');
@@ -148,7 +142,6 @@ export function NamBar() {
   useEffect(() => {
     refreshAudioDevices();
 
-    // Rilevamento in tempo reale dell'inserimento/disinserimento cavo USB
     const handleDeviceChange = () => {
       refreshAudioDevices(true);
     };
@@ -356,7 +349,7 @@ export function NamBar() {
               <div className="flex items-center gap-2">
                 <button
                   onClick={handlePrevModel}
-                  title="Profilo precedente"
+                  title={t.prevModel}
                   className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-neutral-800 hover:bg-amber-500 hover:text-neutral-950 text-white border border-neutral-700 transition-colors cursor-pointer active:scale-95"
                 >
                   <ChevronLeft className="h-5 w-5" />
@@ -380,7 +373,7 @@ export function NamBar() {
 
                 <button
                   onClick={handleNextModel}
-                  title="Profilo successivo"
+                  title={t.nextModel}
                   className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-neutral-800 hover:bg-amber-500 hover:text-neutral-950 text-white border border-neutral-700 transition-colors cursor-pointer active:scale-95"
                 >
                   <ChevronRight className="h-5 w-5" />
@@ -399,7 +392,7 @@ export function NamBar() {
                 </button>
               ) : (
                 <button
-                  onClick={disconnectAudioLine}
+                  onClick= {disconnectAudioLine}
                   className="w-full flex items-center justify-center gap-2 rounded-xl border border-red-500/50 bg-red-500/10 py-3 font-display text-sm uppercase text-red-400 hover:bg-red-500/20 transition-all active:scale-95 cursor-pointer"
                 >
                   {t.disconnectAudio}
@@ -415,38 +408,4 @@ export function NamBar() {
   );
 }
 
-// ==========================================
-// 4. APP PRINCIPALE DELLA SANDBOX
-// ==========================================
-export default function App() {
-  const [language, setLanguage] = useState<Language>('it');
-
-  return (
-    <LanguageContext.Provider value={{ language, setLanguage }}>
-      <div className="min-h-screen bg-neutral-950 p-6 flex flex-col items-center justify-center">
-        
-        <div className="w-full max-w-xl flex justify-end mb-4">
-          <div className="flex items-center gap-1">
-            <div className="flex items-center gap-2 bg-neutral-900 border border-neutral-800 px-3 py-1.5 rounded-lg shadow-md">
-              <Globe className="h-3.5 w-3.5 text-amber-500" />
-              <select
-                value={language}
-                onChange={(e) => setLanguage(e.target.value as Language)}
-                className="bg-neutral-950 text-white text-xs font-semibold px-2 py-1 rounded-md border border-neutral-700 focus:outline-none focus:border-amber-500 cursor-pointer"
-              >
-                <option value="it">🇮🇹 IT</option>
-                <option value="en">🇬🇧 EN</option>
-                <option value="es">🇪🇸 ES</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <div className="w-full max-w-xl">
-          <NamBar />
-        </div>
-
-      </div>
-    </LanguageContext.Provider>
-  );
-}
+export default NamBar;
