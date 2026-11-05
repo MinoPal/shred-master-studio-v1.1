@@ -10,7 +10,6 @@
   "theme_color": "#000000",
   "icons": [
     {
-      "src": "https://shred-master-studio-v1-1.pages.dev/favicon.ico",
       "type": "image/x-icon",
       "isSquare": false,
       "isPng": false,
