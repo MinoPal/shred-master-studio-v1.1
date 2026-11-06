@@ -171,8 +171,12 @@ export function NamBar() {
           echoCancellation: false,
           autoGainControl: false,
           noiseSuppression: false,
+          googEchoCancellation: false,
+          googAutoGainControl: false,
+          googNoiseSuppression: false,
+          googHighpassFilter: false,
           latency: 0,
-        },
+        } as MediaTrackConstraints,
       });
       mediaStreamRef.current = stream;
 
@@ -392,7 +396,7 @@ export function NamBar() {
                 </button>
               ) : (
                 <button
-                  onClick= {disconnectAudioLine}
+                  onClick={disconnectAudioLine}
                   className="w-full flex items-center justify-center gap-2 rounded-xl border border-red-500/50 bg-red-500/10 py-3 font-display text-sm uppercase text-red-400 hover:bg-red-500/20 transition-all active:scale-95 cursor-pointer"
                 >
                   {t.disconnectAudio}
