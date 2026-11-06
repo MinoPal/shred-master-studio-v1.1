@@ -2,7 +2,7 @@
   "background_color": "#000000",
   "description": "Guitar practice studio with NAM neural amp modeler, stem mixer, progressive metronome, and USB audio support.",
   "dir": "ltr",
-  "display": "standalone",
+  "display": "fullscreen",
   "name": "Shred Master Studio",
   "orientation": "any",
   "scope": "/",
