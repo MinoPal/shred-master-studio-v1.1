@@ -161,6 +161,7 @@ export function NamBar() {
   async function connectAudioLine() {
     try {
       const AudioCtxClass = window.AudioContext || (window as any).webkitAudioContext;
+      // Aggancio dinamico al clock nativo del telefono/adattatore via latencyHint
       const ctx = new AudioCtxClass({ latencyHint: 'interactive' });
       if (ctx.state === "suspended") await ctx.resume();
       audioCtxRef.current = ctx;
@@ -175,7 +176,7 @@ export function NamBar() {
           googAutoGainControl: false,
           googNoiseSuppression: false,
           googHighpassFilter: false,
-          latency: 0,
+          channelCount: { ideal: 1 },
         } as MediaTrackConstraints,
       });
       mediaStreamRef.current = stream;
