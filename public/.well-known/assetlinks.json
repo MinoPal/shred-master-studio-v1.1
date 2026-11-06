@@ -2,7 +2,7 @@
       "relation": ["delegate_permission/common.handle_all_urls"],
       "target": {
         "namespace": "android_app",
-        "package_name": "dev.workers.shred_master.minopal_shred_master_studio.twa",
-        "sha256_cert_fingerprints": ["27:CF:F5:05:34:7E:46:99:F7:64:E0:5E:D4:80:76:51:27:A2:0B:5C:CF:31:8D:26:76:93:75:1A:49:F1:62:55"]
+        "package_name": "dev.pages.shred_master_studio_v1_1.twa",
+        "sha256_cert_fingerprints": ["89:E8:8B:B4:80:F2:C7:E6:5F:00:D1:2A:CE:A4:20:83:76:CA:09:7B:E2:91:30:F5:49:98:5B:70:A6:A1:3C:46"]
       }
     }]
